@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { AddressModule } from './address/address.module';
+import { CartModule } from './cart/cart.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -21,6 +22,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     ProductModule,
     CategoryModule,
     AddressModule,
+    CartModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

@@ -39,7 +39,7 @@ export class CreateAddressDto {
   @Transform(({ value }) => {
     if (value === 'true') return true;
     if (value === 'false') return false;
-    return value;
+    return value as boolean;
   })
   isDefault?: boolean;
 }
