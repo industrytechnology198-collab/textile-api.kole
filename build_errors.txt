@@ -1,0 +1,45 @@
+[96msrc/product/repositories/product.repository.ts[0m:[93m159[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '{ id: string; catalogReference: string; brand: string; weight: string | null; gender: string | null; labelType: string | null; organic: boolean; recycled: boolean; vegan: boolean; oekoTex: boolean; ... 4 more ...; updatedAt: Date; }[]' is not assignable to type 'never[]'.
+  Type '{ id: string; catalogReference: string; brand: string; weight: string | null; gender: string | null; labelType: string | null; organic: boolean; recycled: boolean; vegan: boolean; oekoTex: boolean; ... 4 more ...; updatedAt: Date; }' is not assignable to type 'never'.
+
+[7m159[0m       finalProducts = await this.prisma.product.findMany({
+[7m   [0m [91m      ~~~~~~~~~~~~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m170[0m:[93m28[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'translations' does not exist in type 'CategoryInclude<DefaultArgs>'.
+
+[7m170[0m                 include: { translations: true },
+[7m   [0m [91m                           ~~~~~~~~~~~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m177[0m:[93m15[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'translations' does not exist in type 'ProductColorInclude<DefaultArgs>'.
+
+[7m177[0m               translations: true,
+[7m   [0m [91m              ~~~~~~~~~~~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m187[0m:[93m40[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m187[0m         (a, b) => productIds.indexOf(a.id) - productIds.indexOf(b.id),
+[7m   [0m [91m                                       ~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m187[0m:[93m67[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m187[0m         (a, b) => productIds.indexOf(a.id) - productIds.indexOf(b.id),
+[7m   [0m [91m                                                                  ~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m190[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '{ id: string; catalogReference: string; brand: string; weight: string | null; gender: string | null; labelType: string | null; organic: boolean; recycled: boolean; vegan: boolean; oekoTex: boolean; ... 4 more ...; updatedAt: Date; }[]' is not assignable to type 'never[]'.
+  Type '{ id: string; catalogReference: string; brand: string; weight: string | null; gender: string | null; labelType: string | null; organic: boolean; recycled: boolean; vegan: boolean; oekoTex: boolean; ... 4 more ...; updatedAt: Date; }' is not assignable to type 'never'.
+
+[7m190[0m       finalProducts = await this.prisma.product.findMany({
+[7m   [0m [91m      ~~~~~~~~~~~~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m204[0m:[93m28[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'translations' does not exist in type 'CategoryInclude<DefaultArgs>'.
+
+[7m204[0m                 include: { translations: true },
+[7m   [0m [91m                           ~~~~~~~~~~~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m211[0m:[93m15[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'translations' does not exist in type 'ProductColorInclude<DefaultArgs>'.
+
+[7m211[0m               translations: true,
+[7m   [0m [91m              ~~~~~~~~~~~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m236[0m:[93m26[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'translations' does not exist in type 'CategoryInclude<DefaultArgs>'.
+
+[7m236[0m               include: { translations: true },
+[7m   [0m [91m                         ~~~~~~~~~~~~[0m
+[96msrc/product/repositories/product.repository.ts[0m:[93m243[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'translations' does not exist in type 'ProductColorInclude<DefaultArgs>'.
+
+[7m243[0m             translations: true,
+[7m   [0m [91m            ~~~~~~~~~~~~[0m
+
+Found 10 error(s).
+

@@ -1,0 +1,363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// AUTH & USERS
+// ─────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  email           String   @unique
+  password        String?
+  firstName       String
+  lastName        String
+  phoneNumber     String?
+  isEmailVerified Boolean  @default(false)
+  role            Role     @default(CUSTOMER)
+  googleId        String?  @unique
+  provider        String   @default("local")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  addresses          Address[]
+  orders             Order[]
+  cart               Cart?
+  reviews            Review[]
+  emailVerifications EmailVerification[]
+  refreshTokens      RefreshToken[]
+  passwordResets     PasswordReset[]
+}
+
+model EmailVerification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  code      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  token     String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Address {
+  id           String  @id @default(uuid()) @db.Uuid
+  userId       String  @db.Uuid
+  fullName     String
+  phoneNumber  String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String?
+  postalCode   String
+  country      String
+  isDefault    Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// INTERNATIONALISATION
+// ─────────────────────────────────────────────
+
+// Single source of truth for supported languages
+model Language {
+  code     String  @id       // "en" | "fr" | "de"
+  name     String            // "English" | "Français" | "Deutsch"
+  isActive Boolean @default(true)
+
+  translations Translation[]
+}
+
+// One table for ALL translatable content across the entire app
+// entityType: "product" | "category" | "color" | "image" | "packshot"
+// field:      "name" | "description" | "composition" | "colorName" | "alt" ...
+model Translation {
+  id         String @id @default(uuid()) @db.Uuid
+  entityId   String @db.Uuid
+  entityType String
+  langCode   String
+  field      String
+  value      String
+
+  language Language @relation(fields: [langCode], references: [code])
+
+  @@unique([entityId, entityType, langCode, field])
+  @@index([entityId, entityType, langCode])
+}
+
+// ─────────────────────────────────────────────
+// CATEGORIES
+// ─────────────────────────────────────────────
+
+// Translatable fields → Translation: "name"
+model Category {
+  id       String  @id @default(uuid()) @db.Uuid
+  parentId String? @db.Uuid    // null = top-level family | set = subcategory
+  slug     String  @unique      // "headwear-accessories" | "caps" | "beanies"
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products ProductCategory[]
+
+  @@index([parentId])
+}
+
+// ─────────────────────────────────────────────
+// PRODUCTS
+// ─────────────────────────────────────────────
+
+// Translatable fields → Translation: "name" | "description" | "composition" | "mainMaterials"
+// Non-translatable: everything below — same in every language
+model Product {
+  id               String    @id @default(uuid()) @db.Uuid
+  catalogReference String    @unique   // "B050" — Toptex reference, sync anchor
+  brand            String
+  weight           String?             // "80 g"
+  gender           String?             // "Unisex" | "Men" | "Women" | "Kids"
+  labelType        String?             // "tear_away" | "woven"
+  organic          Boolean   @default(false)
+  recycled         Boolean   @default(false)
+  vegan            Boolean   @default(false)
+  oekoTex          Boolean   @default(false)
+  saleState        String    @default("active")
+  lastChange       DateTime?
+  toptexCreatedAt  DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  categories ProductCategory[]
+  images     ProductImage[]
+  colors     ProductColor[]
+  reviews    Review[]
+}
+
+// Junction: product ↔ category (many-to-many)
+model ProductCategory {
+  productId  String @db.Uuid
+  categoryId String @db.Uuid
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@id([productId, categoryId])
+}
+
+// Generic product-level images — shared across all colors
+// Translatable fields → Translation: "alt"
+model ProductImage {
+  id               String    @id @default(uuid()) @db.Uuid
+  productId        String    @db.Uuid
+  imageId          Int?
+  urlImage         String
+  urlAuthenticated String?
+  isMain           Boolean   @default(false)  // first image from Toptex = true
+  lastUpdate       DateTime?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ─────────────────────────────────────────────
+// COLORS  (one row per color)
+// ─────────────────────────────────────────────
+
+// Translatable fields → Translation: "colorName"
+model ProductColor {
+  id         String    @id @default(uuid()) @db.Uuid
+  productId  String    @db.Uuid
+  colorCode  String                    // Toptex internal code e.g. "77310"
+  hexColor   String?                   // "#000000"
+  pantone    String?
+  rgb        String?
+  cmyk       String?
+  saleState  String    @default("active")
+  lastChange DateTime?
+
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  skus      ProductSku[]
+  packshots ColorPackshot[]
+
+  @@unique([productId, colorCode])
+  @@index([productId])
+}
+
+// Color-specific studio shots
+// Translatable fields → Translation: "alt"
+model ColorPackshot {
+  id               String    @id @default(uuid()) @db.Uuid
+  colorId          String    @db.Uuid
+  imageId          Int?
+  angleName        String              // "FACE" | "BACK" | "SIDE" | "FACE CAP"
+  urlImage         String
+  urlAuthenticated String?
+  lastUpdate       DateTime?
+
+  color ProductColor @relation(fields: [colorId], references: [id], onDelete: Cascade)
+
+  @@index([colorId])
+}
+
+// ─────────────────────────────────────────────
+// SKUs  (color × size = one buyable unit)
+// ─────────────────────────────────────────────
+
+model ProductSku {
+  id             String   @id @default(uuid()) @db.Uuid
+  colorId        String   @db.Uuid
+  sku            String   @unique   // "B050_77310_77309"
+  ean            String?
+  barCode        String?
+  sizeLabel      String?            // "One Size" | "S" | "M" | "L" | "XL"
+  sizeCode       String?
+  price          Decimal  @db.Decimal(10, 2)
+  publicPrice    Decimal? @db.Decimal(10, 2)
+  unitsPerBox    Int?
+  unitsPerPack   Int?
+  isNew          Boolean  @default(false)
+  isDiscontinued Boolean  @default(false)
+  saleState      String   @default("active")
+
+  color      ProductColor @relation(fields: [colorId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([colorId])
+  @@index([sku])
+}
+
+// ─────────────────────────────────────────────
+// ORDERS
+// ─────────────────────────────────────────────
+
+model Order {
+  id            String      @id @default(uuid()) @db.Uuid
+  userId        String      @db.Uuid
+  status        OrderStatus @default(PENDING)
+  totalPrice    Decimal     @db.Decimal(10, 2)
+  toptexOrderId String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id       String  @id @default(uuid()) @db.Uuid
+  orderId  String  @db.Uuid
+  skuId    String  @db.Uuid
+  quantity Int
+  price    Decimal @db.Decimal(10, 2)  // price snapshot at time of order
+
+  order Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sku   ProductSku @relation(fields: [skuId], references: [id])
+
+  @@index([orderId])
+}
+
+// ─────────────────────────────────────────────
+// CART
+// ─────────────────────────────────────────────
+
+model Cart {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @db.Uuid
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id       String @id @default(uuid()) @db.Uuid
+  cartId   String @db.Uuid
+  skuId    String @db.Uuid
+  quantity Int
+
+  cart Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  sku  ProductSku @relation(fields: [skuId], references: [id])
+
+  @@index([cartId])
+}
+
+// ─────────────────────────────────────────────
+// REVIEWS
+// ─────────────────────────────────────────────
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  productId String   @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// MISC
+// ─────────────────────────────────────────────
+
+// Key-value store for app configuration
+// Useful keys: "toptex_last_sync" | "toptex_api_url" | "default_language" | "maintenance_mode"
+model Settings {
+  id    String @id @default(uuid()) @db.Uuid
+  key   String @unique
+  value String
+}
