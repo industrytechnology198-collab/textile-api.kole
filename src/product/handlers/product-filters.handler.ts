@@ -47,7 +47,7 @@ export class ProductFiltersHandler {
       brands: dto.brands,
     };
 
-    const raw = await this.productRepo.getFiltersData(filters, dto.lang);
+    const raw = await this.productRepo.getFiltersData(filters, dto.lang, dto.q);
 
     const sizes = raw.sizes.slice().sort((a, b) => {
       const idxA = SIZE_ORDER.indexOf(a.label);

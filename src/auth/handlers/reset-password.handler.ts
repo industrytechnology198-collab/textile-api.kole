@@ -13,9 +13,16 @@ export class ResetPasswordHandler {
     private readonly authRepository: AuthRepository,
   ) {}
 
-  async execute(dto: ResetPasswordDto, res: Response): Promise<{ message: string }> {
-    const hashedToken = crypto.createHash('sha256').update(dto.token).digest('hex');
-    const record = await this.authRepository.findActivePasswordReset(hashedToken);
+  async execute(
+    dto: ResetPasswordDto,
+    res: Response,
+  ): Promise<{ message: string }> {
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(dto.token)
+      .digest('hex');
+    const record =
+      await this.authRepository.findActivePasswordReset(hashedToken);
 
     if (!record) {
       throw new BadRequestException('Invalid or expired reset token');

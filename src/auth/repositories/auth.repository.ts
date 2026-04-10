@@ -40,7 +40,11 @@ export class AuthRepository {
 
   // ─── Refresh Tokens ──────────────────────────────────────────────────────────
 
-  async createRefreshToken(userId: string, hashedToken: string, expiresAt: Date) {
+  async createRefreshToken(
+    userId: string,
+    hashedToken: string,
+    expiresAt: Date,
+  ) {
     return this.prisma.refreshToken.create({
       data: { userId, token: hashedToken, expiresAt },
     });
@@ -72,7 +76,11 @@ export class AuthRepository {
 
   // ─── Password Reset ──────────────────────────────────────────────────────────
 
-  async createPasswordReset(userId: string, hashedToken: string, expiresAt: Date) {
+  async createPasswordReset(
+    userId: string,
+    hashedToken: string,
+    expiresAt: Date,
+  ) {
     return this.prisma.passwordReset.create({
       data: { userId, token: hashedToken, expiresAt },
     });

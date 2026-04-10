@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MinLength,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
@@ -14,6 +15,14 @@ export class GetFiltersDto {
   @IsString()
   @IsIn(['en', 'fr', 'de'])
   lang!: string;
+
+  @ApiPropertyOptional({
+    description: 'Search term (min 2 chars) — scopes filters to search results',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  q?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

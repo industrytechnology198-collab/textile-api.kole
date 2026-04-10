@@ -11,12 +11,7 @@ import { UpdateAddressDto } from '../dto/update-address.dto';
 export class UpdateAddressHandler {
   constructor(private readonly addressRepository: AddressRepository) {}
 
-  async execute(
-    id: string,
-    userId: string,
-    role: Role,
-    dto: UpdateAddressDto,
-  ) {
+  async execute(id: string, userId: string, role: Role, dto: UpdateAddressDto) {
     const address = await this.addressRepository.findById(id);
 
     if (!address) {

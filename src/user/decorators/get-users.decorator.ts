@@ -1,5 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 export function ApiGetUsers() {
   return applyDecorators(

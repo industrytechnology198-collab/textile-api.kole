@@ -41,11 +41,8 @@ export class ToptexApiService implements OnModuleInit {
           if (accessToken) {
             config.headers['x-toptex-authorization'] = accessToken;
 
-            // Also add the x-api-key if needed by other API endpoints
-            const apiKey =
-              this.configService.get<string>('TOPTEX_API_KEY') ||
-              'zg8a17hWXg6OzYfVIksyA503IoXC5fidahh3h0yk';
-            if (!config.headers['x-api-key']) {
+            const apiKey = this.configService.get<string>('TOPTEX_API_KEY');
+            if (apiKey && !config.headers['x-api-key']) {
               config.headers['x-api-key'] = apiKey;
             }
           }
@@ -68,14 +65,9 @@ export class ToptexApiService implements OnModuleInit {
   private async authenticate(): Promise<string> {
     this.logger.log('Authenticating with Toptex API...');
 
-    // Read from ConfigService with fallback to provided credentials
-    const username =
-      this.configService.get<string>('TOPTEX_USERNAME') || 'tobe_benit';
-    const password =
-      this.configService.get<string>('TOPTEX_PASSWORD') || 'Noura1990_1';
-    const apiKey =
-      this.configService.get<string>('TOPTEX_API_KEY') ||
-      'zg8a17hWXg6OzYfVIksyA503IoXC5fidahh3h0yk';
+    const username = this.configService.get<string>('TOPTEX_USERNAME');
+    const password = this.configService.get<string>('TOPTEX_PASSWORD');
+    const apiKey = this.configService.get<string>('TOPTEX_API_KEY');
 
     if (!username || !password || !apiKey) {
       this.logger.error('Missing Toptex credentials');
@@ -115,10 +107,15 @@ export class ToptexApiService implements OnModuleInit {
     }
   }
 
-  // Example generic call function
-  // Other services can inject ToptexApiService and use this method or directly use HttpService
   async get<T>(url: string, config?: any): Promise<T> {
     const response = await lastValueFrom(this.httpService.get<T>(url, config));
+    return response.data;
+  }
+
+  async post<T>(url: string, body?: any, config?: any): Promise<T> {
+    const response = await lastValueFrom(
+      this.httpService.post<T>(url, body, config),
+    );
     return response.data;
   }
 }

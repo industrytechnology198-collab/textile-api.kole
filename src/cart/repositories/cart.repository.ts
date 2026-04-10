@@ -15,11 +15,21 @@ const cartItemWithSku = {
           select: {
             colorCode: true,
             hexColor: true,
+            packshots: {
+              where: { angleName: 'FACE' },
+              select: { urlImage: true },
+              take: 1,
+            },
             product: {
               select: {
                 id: true,
                 catalogReference: true,
                 brand: true,
+                images: {
+                  where: { isMain: true },
+                  select: { urlImage: true },
+                  take: 1,
+                },
               },
             },
           },

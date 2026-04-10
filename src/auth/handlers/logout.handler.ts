@@ -11,8 +11,12 @@ export class LogoutHandler {
     const rawToken: string | undefined = req.cookies?.refresh_token;
 
     if (rawToken) {
-      const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
-      const record = await this.authRepository.findActiveRefreshToken(hashedToken);
+      const hashedToken = crypto
+        .createHash('sha256')
+        .update(rawToken)
+        .digest('hex');
+      const record =
+        await this.authRepository.findActiveRefreshToken(hashedToken);
 
       if (record) {
         await this.authRepository.revokeRefreshToken(record.id);

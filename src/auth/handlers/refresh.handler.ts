@@ -22,8 +22,12 @@ export class RefreshHandler {
       throw new UnauthorizedException('Refresh token missing');
     }
 
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const record = await this.authRepository.findActiveRefreshToken(hashedToken);
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
+    const record =
+      await this.authRepository.findActiveRefreshToken(hashedToken);
 
     if (!record) {
       throw new UnauthorizedException('Invalid or expired refresh token');
@@ -36,20 +40,33 @@ export class RefreshHandler {
       throw new UnauthorizedException('User not found');
     }
 
-    const accessToken = this.jwtService.sign(
-      { userId: user.id, email: user.email, role: user.role },
-    );
+    const accessToken = this.jwtService.sign({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     const newRawToken = crypto.randomUUID();
-    const newHashedToken = crypto.createHash('sha256').update(newRawToken).digest('hex');
+    const newHashedToken = crypto
+      .createHash('sha256')
+      .update(newRawToken)
+      .digest('hex');
 
-    const expiresStr = this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN', '30d');
+    const expiresStr = this.configService.get<string>(
+      'REFRESH_TOKEN_EXPIRES_IN',
+      '30d',
+    );
     const expiresMs = this.parseDuration(expiresStr);
     const expiresAt = new Date(Date.now() + expiresMs);
 
-    await this.authRepository.createRefreshToken(user.id, newHashedToken, expiresAt);
+    await this.authRepository.createRefreshToken(
+      user.id,
+      newHashedToken,
+      expiresAt,
+    );
 
-    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
 
     res.cookie('refresh_token', newRawToken, {
       httpOnly: true,

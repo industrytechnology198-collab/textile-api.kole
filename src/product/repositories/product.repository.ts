@@ -13,6 +13,8 @@ export interface ProductFilters {
   colors?: string[];
   sizes?: string[];
   brands?: string[];
+  /** Pre-computed IDs from a search query — scopes all filter aggregations */
+  searchIds?: string[];
 }
 
 interface RawSortResult {
@@ -204,13 +206,28 @@ export class ProductRepository {
 
   // ─── filters aggregation ──────────────────────────────────────────────────
 
-  async getFiltersData(filters: ProductFilters, lang: string) {
+  async getFiltersData(filters: ProductFilters, lang: string, q?: string) {
+    let base = filters;
+
+    if (q) {
+      const searchIds = await this.getProductIdsMatchingSearch(q, lang);
+      if (searchIds.length === 0) {
+        return {
+          colors: [],
+          sizes: [],
+          brands: [],
+          priceRange: { min: null, max: null },
+        };
+      }
+      base = { ...filters, searchIds };
+    }
+
     const [colorsBaseIds, sizesBaseIds, brandsBaseIds, priceBaseIds] =
       await Promise.all([
-        this.getProductIds({ ...filters, colors: undefined }),
-        this.getProductIds({ ...filters, sizes: undefined }),
-        this.getProductIds({ ...filters, brands: undefined }),
-        this.getProductIds(filters),
+        this.getProductIds({ ...base, colors: undefined }),
+        this.getProductIds({ ...base, sizes: undefined }),
+        this.getProductIds({ ...base, brands: undefined }),
+        this.getProductIds(base),
       ]);
 
     const [colors, sizes, brands, priceRange] = await Promise.all([
@@ -221,6 +238,52 @@ export class ProductRepository {
     ]);
 
     return { colors, sizes, brands, priceRange };
+  }
+
+  private async getProductIdsMatchingSearch(
+    q: string,
+    lang: string,
+  ): Promise<string[]> {
+    const partial = `%${q}%`;
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT DISTINCT p."id"
+      FROM "Product" p
+      LEFT JOIN "Translation" tn
+        ON tn."entityId" = p."id"
+        AND tn."entityType" = 'product' AND tn."field" = 'name'
+        AND tn."langCode" = ${lang}
+      LEFT JOIN "Translation" tn_en
+        ON tn_en."entityId" = p."id"
+        AND tn_en."entityType" = 'product' AND tn_en."field" = 'name'
+        AND tn_en."langCode" = 'en'
+      LEFT JOIN "Translation" td
+        ON td."entityId" = p."id"
+        AND td."entityType" = 'product' AND td."field" = 'description'
+        AND td."langCode" = ${lang}
+      LEFT JOIN "Translation" td_en
+        ON td_en."entityId" = p."id"
+        AND td_en."entityType" = 'product' AND td_en."field" = 'description'
+        AND td_en."langCode" = 'en'
+      LEFT JOIN "ProductColor" spc
+        ON spc."productId" = p."id" AND spc."saleState" = 'active'
+      LEFT JOIN "Translation" tc
+        ON tc."entityId" = spc."id"
+        AND tc."entityType" = 'color' AND tc."field" = 'colorName'
+        AND tc."langCode" = ${lang}
+      LEFT JOIN "Translation" tc_en
+        ON tc_en."entityId" = spc."id"
+        AND tc_en."entityType" = 'color' AND tc_en."field" = 'colorName'
+        AND tc_en."langCode" = 'en'
+      WHERE p."saleState" = 'active'
+        AND (
+          COALESCE(tn."value", tn_en."value") ILIKE ${partial}
+          OR COALESCE(td."value", td_en."value") ILIKE ${partial}
+          OR COALESCE(tc."value", tc_en."value") ILIKE ${partial}
+          OR p."brand" ILIKE ${partial}
+          OR p."catalogReference" ILIKE ${partial}
+        )
+    `;
+    return rows.map((r) => r.id);
   }
 
   private async getProductIds(filters: ProductFilters): Promise<string[]> {
@@ -516,6 +579,10 @@ export class ProductRepository {
         },
       },
     ];
+
+    if (filters.searchIds !== undefined) {
+      andConditions.push({ id: { in: filters.searchIds } });
+    }
 
     if (filters.colors && filters.colors.length > 0) {
       andConditions.push({

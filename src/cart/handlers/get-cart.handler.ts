@@ -30,7 +30,13 @@ export class GetCartHandler {
         color: {
           colorCode: string;
           hexColor: string | null;
-          product: { id: string; catalogReference: string; brand: string };
+          packshots: { urlImage: string }[];
+          product: {
+            id: string;
+            catalogReference: string;
+            brand: string;
+            images: { urlImage: string }[];
+          };
         };
       };
     }[];
@@ -55,6 +61,10 @@ export class GetCartHandler {
           catalogReference: item.sku.color.product.catalogReference,
           brand: item.sku.color.product.brand,
         },
+        image:
+          item.sku.color.packshots[0]?.urlImage ??
+          item.sku.color.product.images[0]?.urlImage ??
+          null,
       },
     }));
 

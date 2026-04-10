@@ -231,6 +231,17 @@ const MOCK_CUSTOMERS = [
 
 // ─── Seed ─────────────────────────────────────────────────────────────────────
 async function main() {
+  // ── Languages ─────────────────────────────────────────────────────────────
+  await prisma.language.createMany({
+    data: [
+      { code: 'en', name: 'English' },
+      { code: 'fr', name: 'Français' },
+      { code: 'de', name: 'Deutsch' },
+    ],
+    skipDuplicates: true,
+  });
+  console.log('✅ Languages seeded.');
+
   // ── Admin ──────────────────────────────────────────────────────────────────
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
