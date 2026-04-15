@@ -1,5 +1,7 @@
 const http = require('http');
 const url = require('url');
+const fs = require('fs');
+const path = require('path');
 
 const BACKEND_URL = 'http://localhost:4873';
 
@@ -220,6 +222,21 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // GET /payment-test — serve the payment test HTML page
+    if (req.method === 'GET' && pathname === '/payment-test') {
+        const filePath = path.join(__dirname, 'payment-test.html');
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.end('Could not load payment-test.html');
+                return;
+            }
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(data);
+        });
+        return;
+    }
+
     // 404 for everything else
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not found');
@@ -228,4 +245,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(3000, () => {
     console.log('Frontend dev server running at http://localhost:3000');
     console.log('Reset password page: http://localhost:3000/reset-password?token=YOUR_TOKEN');
+    console.log('Payment test page:   http://localhost:3000/payment-test');
 });

@@ -51,5 +51,5 @@ export class AddCartItemHandler {
     }
 
     return this.cartRepo.getCartWithItems(cart.id);
-  }
+        }
 }

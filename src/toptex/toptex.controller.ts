@@ -3,6 +3,7 @@ import { ToptexService } from './toptex.service';
 import { Public } from 'src/common/decorators/public.decorator';
 import { GetToptexStatus } from './decorators/get-toptex-status.decorator';
 import { SyncToptex } from './decorators/sync-toptex.decorator';
+import { RunHardUpsert } from './decorators/run-hard-upsert.decorator';
 import { SyncToptexDto } from './dto/sync-toptex.dto';
 import { RunIncrementalSync } from './decorators/run-incremental-sync.decorator';
 import { RunDeletedSync } from './decorators/run-deleted-sync.decorator';
@@ -29,6 +30,13 @@ export class ToptexController {
   @SyncToptex()
   async runSync(@Body() dto: SyncToptexDto) {
     return this.toptexService.runFullSync(dto);
+  }
+
+  @Public()
+  @Post('hard-upsert')
+  @RunHardUpsert()
+  async runHardUpsert(@Query('startPage') startPage?: number) {
+    return this.toptexService.runHardUpsert(startPage || 1);
   }
 
   @Post('incremental')

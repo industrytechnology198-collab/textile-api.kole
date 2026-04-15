@@ -3,7 +3,7 @@ import { ToptexApiService } from '../services/toptex-api.service';
 import { ToptexRepository } from '../repositories/toptex.repository';
 
 const PAGE_SIZE = 50;
-const LANGS = 'fr,en,de';
+const LANGS = 'fr,en,de,nl';
 
 // Helpers
 function slugify(text: string): string {
@@ -26,9 +26,9 @@ function firstString(value: any): string {
   if (Array.isArray(value) && value.length > 0) {
     const item = value[0];
     if (typeof item === 'string') return item;
-    if (typeof item === 'object') return item.en || item.fr || item.de || '';
+    if (typeof item === 'object') return item.en || item.fr || item.de || item.nl || '';
   }
-  if (typeof value === 'object') return value.en || value.fr || value.de || '';
+  if (typeof value === 'object') return value.en || value.fr || value.de || value.nl || '';
   return String(value);
 }
 
@@ -79,7 +79,7 @@ export class ToptexSyncHandler {
         } catch (err) {
           retries++;
           this.logger.warn(
-            `Error on page ${page} (Attempt ${retries}/3): ${err.message}.`,
+            `Error on page ${page} (Attempt ${retries}/3): .`,
           );
           if (retries < 3) {
             this.logger.warn(
@@ -110,7 +110,7 @@ export class ToptexSyncHandler {
           productsSynced++;
         } catch (err) {
           this.logger.error(
-            `Failed on product ${item?.catalogReference}: ${err.message}`,
+            `Failed on product ${item?.catalogReference}}`,
           );
         }
       }
@@ -157,6 +157,7 @@ export class ToptexSyncHandler {
       { code: 'en', name: 'English' },
       { code: 'fr', name: 'Français' },
       { code: 'de', name: 'Deutsch' },
+      { code: 'nl', name: 'Nederlands' },
     ];
     for (const lang of languages) {
       await this.toptexRepo.upsertLanguage(lang.code, lang.name);

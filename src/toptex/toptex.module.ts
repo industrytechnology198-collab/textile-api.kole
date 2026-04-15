@@ -9,6 +9,7 @@ import { ToptexController } from './toptex.controller';
 import { ToptexService } from './toptex.service';
 import { ToptexStatusHandler } from './handlers/toptex-status.handler';
 import { ToptexSyncHandler } from './handlers/toptex-sync.handler';
+import { ToptexHardUpsertHandler } from './handlers/toptex-hard-upsert.handler';
 import { SyncLogsHandler } from './handlers/sync-logs.handler';
 import { ToptexRepository } from './repositories/toptex.repository';
 import { IncrementalSyncRepository } from './repositories/incremental-sync.repository';
@@ -28,6 +29,7 @@ import { IncrementalSyncRepository } from './repositories/incremental-sync.repos
     ToptexService,
     ToptexStatusHandler,
     ToptexSyncHandler,
+    ToptexHardUpsertHandler,
     SyncLogsHandler,
     IncrementalSyncService,
     NightlySchedulerService,

@@ -87,6 +87,7 @@ export function buildToptexPayloadFromCart(
   cart: CartWithSku,
   address: Address,
   user: UserToptexInfo,
+  testMode: boolean,
 ): CreateToptexOrderDto {
   return {
     orderID: myOrderId,
@@ -98,7 +99,7 @@ export function buildToptexPayloadFromCart(
     waitForFreeShipping: 0,
     expressShipping: '',
     neutralDeliveryNote: 0,
-    testMode: true, // TODO: set to false in production
+    testMode,
     comment: '',
     deliveryAddress: buildDeliveryAddress(address, user),
     orderLines: buildOrderLinesFromCart(cart),
@@ -109,6 +110,7 @@ export function buildToptexPayloadFromOrder(
   order: OrderWithItems,
   address: Address,
   user: UserToptexInfo,
+  testMode: boolean,
 ): CreateToptexOrderDto {
   const orderReference = order.myOrderId ?? order.id;
 
@@ -122,7 +124,7 @@ export function buildToptexPayloadFromOrder(
     waitForFreeShipping: 0,
     expressShipping: '',
     neutralDeliveryNote: 0,
-    testMode: true, // TODO: set to false in production
+    testMode,
     comment: '',
     deliveryAddress: buildDeliveryAddress(address, user),
     orderLines: buildOrderLinesFromOrder(order),

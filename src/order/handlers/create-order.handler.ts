@@ -21,7 +21,7 @@ export class CreateOrderHandler {
     private readonly toptexOrderService: ToptexOrderService,
   ) {}
 
-  async execute(userId: string) {
+  async execute(userId: string, testMode: boolean) {
     const cart = await this.orderRepository.findCartByUserIdWithItems(userId);
 
     if (!cart || cart.cartItems.length === 0) {
@@ -78,7 +78,7 @@ export class CreateOrderHandler {
     });
 
     try {
-      const payload = buildToptexPayloadFromCart(myOrderId, cart, address, user);
+      const payload = buildToptexPayloadFromCart(myOrderId, cart, address, user, testMode);
       this.logger.log(
         `Sending to Toptex — country: "${payload.deliveryAddress.country}", payload: ${JSON.stringify(payload)}`,
       );

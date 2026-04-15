@@ -16,11 +16,15 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayload } from 'src/auth/strategies/jwt.strategy';
 import { OrderService } from './order.service';
+import { CreateOrderDto } from './dto/create-order.dto';
 import {
   GetOrdersQueryDto,
   GetAdminOrdersQueryDto,
   UpdateOrderStatusDto,
+  ForwardOrderDto,
 } from './dto/order-query.dto';
+import { ApiCreateOrder } from './decorators/create-order.decorator';
+import { ApiAdminForwardOrder } from './decorators/admin-forward-order.decorator';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -29,8 +33,12 @@ export class OrderController {
 
   // User routes
   @Post()
-  createOrder(@CurrentUser() user: JwtPayload) {
-    return this.orderService.createOrder(user.userId);
+  @ApiCreateOrder()
+  createOrder(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: CreateOrderDto,
+  ) {
+    return this.orderService.createOrder(user.userId, dto.testMode);
   }
 
   @Get()
@@ -65,8 +73,12 @@ export class OrderController {
 
   @Post('admin/:id/forward')
   @Roles(Role.ADMIN)
-  adminForwardToToptex(@Param('id') id: string) {
-    return this.orderService.adminForwardToToptex(id);
+  @ApiAdminForwardOrder()
+  adminForwardToToptex(
+    @Param('id') id: string,
+    @Body() dto: ForwardOrderDto,
+  ) {
+    return this.orderService.adminForwardToToptex(id, dto.testMode);
   }
 
   @Get('admin/:id/toptex')

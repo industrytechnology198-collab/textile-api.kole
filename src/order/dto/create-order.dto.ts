@@ -1,5 +1,7 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class CreateOrderDto {
-  // No request body - takes items from cart
+  @IsBoolean()
+  @IsNotEmpty()
+  testMode!: boolean;
 }

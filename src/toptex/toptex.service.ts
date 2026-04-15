@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SyncLog } from '@prisma/client';
 import { ToptexStatusHandler } from './handlers/toptex-status.handler';
 import { ToptexSyncHandler } from './handlers/toptex-sync.handler';
+import { ToptexHardUpsertHandler, type HardUpsertStats } from './handlers/toptex-hard-upsert.handler';
 import {
   SyncLogsHandler,
   SyncStatusResponse,
@@ -16,6 +17,7 @@ export class ToptexService {
   constructor(
     private readonly statusHandler: ToptexStatusHandler,
     private readonly syncHandler: ToptexSyncHandler,
+    private readonly hardUpsertHandler: ToptexHardUpsertHandler,
     private readonly syncLogsHandler: SyncLogsHandler,
     private readonly incrementalSyncService: IncrementalSyncService,
   ) {}
@@ -26,6 +28,12 @@ export class ToptexService {
 
   async runFullSync(dto?: SyncToptexDto) {
     return this.syncHandler.execute(dto?.continue, dto?.page);
+  }
+
+  async runHardUpsert(
+    startPage: number = 1,
+  ): Promise<{ message: string; stats: HardUpsertStats }> {
+    return this.hardUpsertHandler.execute(startPage);
   }
 
   async runIncrementalSync(

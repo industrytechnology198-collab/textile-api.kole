@@ -1,0 +1,2902 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/auth/register": {
+            "post": {
+                "operationId": "AuthController_register",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Verification email sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "Verification email sent"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email already in use"
+                    }
+                },
+                "summary": "Register a new customer account",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/verify-email": {
+            "post": {
+                "operationId": "AuthController_verifyEmail",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyEmailDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "Email verified successfully"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired code"
+                    }
+                },
+                "summary": "Verify email with 6-digit code",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "operationId": "AuthController_login",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns access token and user info"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                },
+                "summary": "Login with email and password",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "operationId": "AuthController_refresh",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Returns new access token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "accessToken": "jwt..."
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Refresh token missing or invalid"
+                    }
+                },
+                "summary": "Refresh access token using httpOnly cookie",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "operationId": "AuthController_logout",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "Logged out successfully"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Logout and revoke refresh token",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/forgot-password": {
+            "post": {
+                "operationId": "AuthController_forgotPassword",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ForgotPasswordDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Safe response regardless of email existence",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "If this email exists you will receive a reset link"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Request a password reset link",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "operationId": "AuthController_resetPassword",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetPasswordDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "Password reset successfully"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired token"
+                    }
+                },
+                "summary": "Reset password using token from email",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/resend-verification": {
+            "post": {
+                "operationId": "AuthController_resendVerification",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResendVerificationDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Safe response regardless of email state",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "If this email exists and is unverified you will receive a new code"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Resend email verification code",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/change-password": {
+            "post": {
+                "operationId": "AuthController_changePassword",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangePasswordDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "Password changed successfully"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Old password is incorrect or new password is the same"
+                    },
+                    "401": {
+                        "description": "Invalid or missing JWT"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Change password (logged-in user, provides old + new password)",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/google": {
+            "post": {
+                "operationId": "AuthController_googleAuth",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GoogleAuthDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns access token and user info"
+                    },
+                    "401": {
+                        "description": "Invalid Google token"
+                    },
+                    "409": {
+                        "description": "An account with this email already exists. Please login with your password"
+                    }
+                },
+                "summary": "Authenticate with Google ID token",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/users/me": {
+            "get": {
+                "operationId": "UserController_getMe",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Current user data returned successfully."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get current authenticated user profile",
+                "tags": [
+                    "Users"
+                ]
+            },
+            "patch": {
+                "operationId": "UserController_updateMe",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMeDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update own profile (firstName, lastName, phoneNumber)",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/users/me/password": {
+            "patch": {
+                "operationId": "UserController_updateMePassword",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMePasswordDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "Password updated successfully"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Current password incorrect."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Change own password (Customer only)",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/users/me/email": {
+            "patch": {
+                "operationId": "UserController_updateMeEmail",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMeEmailDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email updated. Verification email sent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "example": {
+                                        "message": "Email updated. Please verify your new email."
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Password incorrect."
+                    },
+                    "409": {
+                        "description": "Email already in use."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Change own email (Customer only)",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/users": {
+            "get": {
+                "operationId": "UserController_findAll",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "default": 1,
+                            "example": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "default": 20,
+                            "example": 20,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of users"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get all users (Admin only)",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "operationId": "UserController_findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User returned successfully."
+                    },
+                    "404": {
+                        "description": "User not found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get a user by ID (Admin only)",
+                "tags": [
+                    "Users"
+                ]
+            },
+            "patch": {
+                "operationId": "UserController_updateUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminUpdateUserDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully."
+                    },
+                    "404": {
+                        "description": "User not found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Admin update user by ID",
+                "tags": [
+                    "Users"
+                ]
+            },
+            "delete": {
+                "operationId": "UserController_remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully."
+                    },
+                    "400": {
+                        "description": "Admin cannot delete themselves."
+                    },
+                    "404": {
+                        "description": "User not found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Delete a user by ID (Admin only)",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/sync/status": {
+            "get": {
+                "operationId": "ToptexController_getStatus",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Authentication is successful."
+                    },
+                    "401": {
+                        "description": "Authentication failed."
+                    }
+                },
+                "summary": "Check Toptex API Authentication Status",
+                "tags": [
+                    "Toptex",
+                    "Toptex"
+                ]
+            }
+        },
+        "/sync/full": {
+            "post": {
+                "operationId": "ToptexController_runSync",
+                "parameters": [],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SyncToptexDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sync completed successfully."
+                    },
+                    "500": {
+                        "description": "Internal server error during sync."
+                    }
+                },
+                "summary": "Run a full sync of all Toptex products (clears existing data)",
+                "tags": [
+                    "Toptex",
+                    "Toptex"
+                ]
+            }
+        },
+        "/sync/hard-upsert": {
+            "post": {
+                "description": "This endpoint performs a full hard upsert of all products. Existing products are updated (including images with fresh tokens), new products are added. NO DATA IS DELETED. Perfect for refreshing expired image tokens.",
+                "operationId": "ToptexController_runHardUpsert",
+                "parameters": [
+                    {
+                        "name": "startPage",
+                        "required": false,
+                        "in": "query",
+                        "description": "Starting page number (default: 1)",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Hard upsert completed successfully with detailed statistics."
+                    },
+                    "500": {
+                        "description": "Internal server error during hard upsert."
+                    }
+                },
+                "summary": "Run hard upsert of all Toptex products (updates existing, keeps data, refreshes images with fresh tokens)",
+                "tags": [
+                    "Toptex",
+                    "Toptex"
+                ]
+            }
+        },
+        "/sync/incremental": {
+            "post": {
+                "operationId": "ToptexController_runIncrementalSync",
+                "parameters": [],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IncrementalSyncDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upsert sync started in background."
+                    }
+                },
+                "summary": "Trigger incremental upsert sync (admin only)",
+                "tags": [
+                    "Toptex",
+                    "Sync"
+                ]
+            }
+        },
+        "/sync/deleted": {
+            "post": {
+                "operationId": "ToptexController_runDeletedSync",
+                "parameters": [],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeletedSyncDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Deleted sync started in background."
+                    }
+                },
+                "summary": "Trigger deleted-items sync (admin only)",
+                "tags": [
+                    "Toptex",
+                    "Sync"
+                ]
+            }
+        },
+        "/sync/logs": {
+            "get": {
+                "operationId": "ToptexController_getSyncLogs",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "default": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "maximum": 100,
+                            "default": 20,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "enum": [
+                                "upsert",
+                                "deleted"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "enum": [
+                                "running",
+                                "success",
+                                "failed"
+                            ],
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated sync logs."
+                    }
+                },
+                "summary": "Get paginated sync logs (admin only)",
+                "tags": [
+                    "Toptex",
+                    "Sync"
+                ]
+            }
+        },
+        "/sync/logs/{id}": {
+            "get": {
+                "operationId": "ToptexController_getSyncLogById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sync log entry."
+                    },
+                    "404": {
+                        "description": "Sync log not found."
+                    }
+                },
+                "summary": "Get a single sync log by ID (admin only)",
+                "tags": [
+                    "Toptex",
+                    "Sync"
+                ]
+            }
+        },
+        "/sync/sync-status": {
+            "get": {
+                "operationId": "ToptexController_getSyncStatus",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Sync status."
+                    }
+                },
+                "summary": "Get the status of the last upsert and deleted sync runs (admin only)",
+                "tags": [
+                    "Toptex",
+                    "Sync"
+                ]
+            }
+        },
+        "/products": {
+            "get": {
+                "operationId": "ProductController_getProducts",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "required": true,
+                        "in": "query",
+                        "description": "Language ("en" | "fr" | "de")",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "categorySlug",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "subCategorySlug",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "default": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "maximum": 100,
+                            "default": 24,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "sortBy",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "default": "newest",
+                            "type": "string",
+                            "enum": [
+                                "price_asc",
+                                "price_desc",
+                                "newest"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "minPrice",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "maxPrice",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "organic",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "recycled",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "colors",
+                        "required": false,
+                        "in": "query",
+                        "description": "Filter by hex color codes e.g. ["#000000","#ffffff"]",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "sizes",
+                        "required": false,
+                        "in": "query",
+                        "description": "Filter by size labels e.g. ["S","M","L"]",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "brands",
+                        "required": false,
+                        "in": "query",
+                        "description": "Filter by brand names e.g. ["Beechfield®","Kariban"]",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Products successfully retrieved."
+                    },
+                    "400": {
+                        "description": "Validation error or invalid slug relationships."
+                    }
+                },
+                "summary": "Paginated product list featuring dynamic filtering and sorting",
+                "tags": [
+                    "Product",
+                    "Product"
+                ]
+            }
+        },
+        "/products/filters": {
+            "get": {
+                "operationId": "ProductController_getFilters",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "required": true,
+                        "in": "query",
+                        "description": "Language ("en" | "fr" | "de")",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "required": false,
+                        "in": "query",
+                        "description": "Search term (min 2 chars) — scopes filters to search results",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "categorySlug",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "subCategorySlug",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "minPrice",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "maxPrice",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "organic",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "recycled",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "colors",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "sizes",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "brands",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Filter options successfully retrieved."
+                    },
+                    "400": {
+                        "description": "Validation error or invalid slug relationships."
+                    }
+                },
+                "summary": "Faceted filter aggregation — returns available options and counts for the current active filters",
+                "tags": [
+                    "Product",
+                    "Product"
+                ]
+            }
+        },
+        "/products/search": {
+            "get": {
+                "operationId": "ProductController_searchProducts",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "required": true,
+                        "in": "query",
+                        "description": "Language ("en" | "fr" | "de")",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "required": true,
+                        "in": "query",
+                        "description": "Search term, minimum 2 characters",
+                        "schema": {
+                            "minLength": 2,
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "default": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "maximum": 100,
+                            "default": 24,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search results successfully retrieved."
+                    },
+                    "400": {
+                        "description": "Validation error — query must be at least 2 characters."
+                    }
+                },
+                "summary": "Full-text product search across name, description, color name, brand and catalog reference",
+                "tags": [
+                    "Product",
+                    "Product"
+                ]
+            }
+        },
+        "/products/{catalogReference}": {
+            "get": {
+                "operationId": "ProductController_getProductDetail",
+                "parameters": [
+                    {
+                        "name": "catalogReference",
+                        "required": true,
+                        "in": "path",
+                        "description": "e.g. B050",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "required": true,
+                        "in": "query",
+                        "description": "Language ("en" | "fr" | "de")",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product successfully retrieved."
+                    },
+                    "404": {
+                        "description": "Product could not be localized."
+                    }
+                },
+                "summary": "Find a single product by catalog reference detailing all variables",
+                "tags": [
+                    "Product",
+                    "Product"
+                ]
+            }
+        },
+        "/categories": {
+            "get": {
+                "operationId": "CategoryController_getCategories",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "required": true,
+                        "in": "query",
+                        "description": "Language ("en" | "fr" | "de")",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Categories successfully retrieved."
+                    }
+                },
+                "summary": "List hierarchical category trees that contain active products",
+                "tags": [
+                    "Category",
+                    "Category"
+                ]
+            }
+        },
+        "/addresses": {
+            "post": {
+                "operationId": "AddressController_create",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "fullName",
+                                    "phoneNumber",
+                                    "addressLine1",
+                                    "city",
+                                    "postalCode",
+                                    "country"
+                                ],
+                                "properties": {
+                                    "fullName": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "phoneNumber": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    },
+                                    "addressLine1": {
+                                        "type": "string",
+                                        "example": "123 Main St"
+                                    },
+                                    "addressLine2": {
+                                        "type": "string",
+                                        "example": "Apt 4B"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "New York"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "example": "NY"
+                                    },
+                                    "postalCode": {
+                                        "type": "string",
+                                        "example": "10001"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "US"
+                                    },
+                                    "isDefault": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Address created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create a new address for the current user",
+                "tags": [
+                    "Addresses"
+                ]
+            },
+            "get": {
+                "operationId": "AddressController_findMyAddresses",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "List of addresses belonging to the current user"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get all addresses of the current user",
+                "tags": [
+                    "Addresses"
+                ]
+            }
+        },
+        "/addresses/admin/all": {
+            "get": {
+                "operationId": "AddressController_adminFindAll",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "example": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "example": 20,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "required": false,
+                        "in": "query",
+                        "description": "Filter by user UUID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of all addresses with user info"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get all addresses in the system (Admin only)",
+                "tags": [
+                    "Addresses"
+                ]
+            }
+        },
+        "/addresses/admin/{id}": {
+            "delete": {
+                "operationId": "AddressController_adminRemove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Address deleted successfully"
+                    },
+                    "400": {
+                        "description": "Cannot delete the user's only address"
+                    },
+                    "404": {
+                        "description": "Address not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Admin: delete any address by ID",
+                "tags": [
+                    "Addresses"
+                ]
+            }
+        },
+        "/addresses/{id}": {
+            "get": {
+                "operationId": "AddressController_findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Address found"
+                    },
+                    "403": {
+                        "description": "Address does not belong to the current user"
+                    },
+                    "404": {
+                        "description": "Address not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get a single address by ID",
+                "tags": [
+                    "Addresses"
+                ]
+            },
+            "patch": {
+                "operationId": "AddressController_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAddressDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Address updated successfully"
+                    },
+                    "403": {
+                        "description": "Address does not belong to the current user"
+                    },
+                    "404": {
+                        "description": "Address not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update an address by ID",
+                "tags": [
+                    "Addresses"
+                ]
+            },
+            "delete": {
+                "operationId": "AddressController_remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Address deleted successfully"
+                    },
+                    "400": {
+                        "description": "Cannot delete the only address. Please add another address first"
+                    },
+                    "403": {
+                        "description": "Address does not belong to the current user"
+                    },
+                    "404": {
+                        "description": "Address not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Delete an address by ID",
+                "tags": [
+                    "Addresses"
+                ]
+            }
+        },
+        "/cart/items": {
+            "post": {
+                "description": "🔒 **Authenticated users only.** Adds a SKU to the logged-in user's cart. If the item already exists in the cart, its quantity is incremented. Stock availability and SKU sale state are validated before adding.",
+                "operationId": "CartController_addItem",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "skuId",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "skuId": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "uuid-here"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "example": 2
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Item added. Returns the full updated cart."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "403": {
+                        "description": "Authenticated but not authorised."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Add an item to the cart",
+                "tags": [
+                    "Cart"
+                ]
+            }
+        },
+        "/cart": {
+            "get": {
+                "description": "🔒 **Authenticated users only.** Returns the full cart for the logged-in user, including all items, SKU details, product images, and per-item pricing.",
+                "operationId": "CartController_getCart",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Returns the full cart with all items and totals."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get the current user's cart",
+                "tags": [
+                    "Cart"
+                ]
+            },
+            "delete": {
+                "description": "🔒 **Authenticated users only.** Removes every item from the logged-in user's cart in one operation.",
+                "operationId": "CartController_clearCart",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Cart cleared successfully."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Clear all items from the cart",
+                "tags": [
+                    "Cart"
+                ]
+            }
+        },
+        "/cart/merge": {
+            "post": {
+                "description": "🔒 **Authenticated users only.** Called immediately after login to merge the locally-stored guest cart into the user's server-side cart. Duplicate items are merged by summing their quantities.",
+                "operationId": "CartController_mergeCart",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "skuId": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Cart merged. Returns the full merged cart."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Merge guest cart into user cart after login",
+                "tags": [
+                    "Cart"
+                ]
+            }
+        },
+        "/cart/admin/all": {
+            "get": {
+                "description": "🔴 **Admin only.** Returns a paginated list of all user carts across the platform, including owner info and item counts.",
+                "operationId": "CartController_adminGetAllCarts",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "example": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "example": 20,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of carts with user info and totals."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "403": {
+                        "description": "Authenticated user is not an admin."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "[Admin] Get paginated list of all carts",
+                "tags": [
+                    "Cart"
+                ]
+            }
+        },
+        "/cart/admin/{userId}": {
+            "get": {
+                "description": "🔴 **Admin only.** Retrieves the full cart for any user by their ID, including all items and pricing.",
+                "operationId": "CartController_adminGetUserCart",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the user whose cart to retrieve",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the user's full cart with all items and pricing."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "403": {
+                        "description": "Authenticated user is not an admin."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "[Admin] Get a specific user's cart",
+                "tags": [
+                    "Cart"
+                ]
+            }
+        },
+        "/cart/items/{skuId}": {
+            "patch": {
+                "description": "🔒 **Authenticated users only.** Updates the quantity of a specific SKU already in the cart. Stock availability is re-validated against the new quantity.",
+                "operationId": "CartController_updateItem",
+                "parameters": [
+                    {
+                        "name": "skuId",
+                        "required": true,
+                        "in": "path",
+                        "description": "SKU ID of the cart item to update",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "quantity": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "example": 3
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cart item updated. Returns the full updated cart."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update quantity of a cart item",
+                "tags": [
+                    "Cart"
+                ]
+            },
+            "delete": {
+                "description": "🔒 **Authenticated users only.** Removes a specific SKU from the logged-in user's cart entirely, regardless of quantity.",
+                "operationId": "CartController_removeItem",
+                "parameters": [
+                    {
+                        "name": "skuId",
+                        "required": true,
+                        "in": "path",
+                        "description": "SKU ID of the item to remove",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item removed. Returns the full updated cart."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Remove an item from the cart",
+                "tags": [
+                    "Cart"
+                ]
+            }
+        },
+        "/orders": {
+            "post": {
+                "description": "🔒 **Authenticated users only.** Creates a new order from the current user's cart and forwards it to Toptex. --- ### ⚠️ Required body field: `testMode` You **must** send `testMode` in the request body: | Value | Effect | |-------|--------| | `true` | Sends a **TEST** order to Toptex — no real fulfillment, safe for development | | `false` | Sends a **REAL** order to Toptex — triggers actual production fulfillment | **Example body:** ```json { "testMode": false } ``` --- Also requires: a default delivery address and at least one item in the cart.",
+                "operationId": "OrderController_createOrder",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "description": "**testMode** (required) — `true` = test order (safe), `false` = real order (production)",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "testMode"
+                                ],
+                                "properties": {
+                                    "testMode": {
+                                        "type": "boolean",
+                                        "example": false,
+                                        "description": "⚠️ REQUIRED. true = test order sent to Toptex (no real fulfillment). false = real production order."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created and forwarded to Toptex."
+                    },
+                    "400": {
+                        "description": "Cart is empty / item unavailable / out of stock / no delivery address."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Place an order from the cart",
+                "tags": [
+                    "Order"
+                ]
+            },
+            "get": {
+                "operationId": "OrderController_getOrders",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "Order"
+                ]
+            }
+        },
+        "/orders/admin/all": {
+            "get": {
+                "operationId": "OrderController_adminGetAllOrders",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "Order"
+                ]
+            }
+        },
+        "/orders/admin/toptex": {
+            "get": {
+                "operationId": "OrderController_adminGetAllToptexOrders",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "Order"
+                ]
+            }
+        },
+        "/orders/admin/{id}/status": {
+            "patch": {
+                "operationId": "OrderController_adminUpdateOrderStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateOrderStatusDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "Order"
+                ]
+            }
+        },
+        "/orders/admin/{id}/forward": {
+            "post": {
+                "description": "🔒 **Admin only.** Forwards an existing order to the Toptex API. --- ### ⚠️ Required body field: `testMode` You **must** send `testMode` in the request body: | Value | Effect | |-------|--------| | `true` | Sends a **TEST** order to Toptex — no real fulfillment, safe for development | | `false` | Sends a **REAL** order to Toptex — triggers actual production fulfillment | **Example body:** ```json { "testMode": false } ``` --- Will fail if the order has already been forwarded to Toptex.",
+                "operationId": "OrderController_adminForwardToToptex",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "The internal order ID to forward.",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "description": "**testMode** (required) — `true` = test order (safe), `false` = real order (production)",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "testMode"
+                                ],
+                                "properties": {
+                                    "testMode": {
+                                        "type": "boolean",
+                                        "example": false,
+                                        "description": "⚠️ REQUIRED. true = test order sent to Toptex (no real fulfillment). false = real production order."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order forwarded to Toptex successfully."
+                    },
+                    "400": {
+                        "description": "Order already forwarded / no delivery address."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "404": {
+                        "description": "Order or user not found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Manually forward an order to Toptex",
+                "tags": [
+                    "Order"
+                ]
+            }
+        },
+        "/orders/admin/{id}/toptex": {
+            "get": {
+                "operationId": "OrderController_adminGetToptexOrder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "Order"
+                ]
+            }
+        },
+        "/orders/{id}": {
+            "get": {
+                "operationId": "OrderController_getOrder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "Order"
+                ]
+            },
+            "delete": {
+                "operationId": "OrderController_cancelOrder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "Order"
+                ]
+            }
+        },
+        "/payments/create-intent": {
+            "post": {
+                "description": "Creates a Stripe PaymentIntent for the given order. The order must belong to the authenticated user and must not already be paid. Returns a `clientSecret` to be used on the frontend to confirm the payment with Stripe.js.",
+                "operationId": "PaymentsController_createPaymentIntent",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "orderId"
+                                ],
+                                "properties": {
+                                    "orderId": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "3f615bd3-f68b-4ff7-86d9-3560f0a613a7",
+                                        "description": "UUID of the order to pay for"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PaymentIntent created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "clientSecret": {
+                                            "type": "string",
+                                            "example": "pi_3PxxxxxxxxxxxxxxxxxxxxXx_secret_xxxxxxxxxxxxxxxxxxxxxx",
+                                            "description": "Stripe client secret — pass this to stripe.confirmCardPayment() on the frontend"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Order is already paid"
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token"
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create a Stripe PaymentIntent for an order",
+                "tags": [
+                    "Payments"
+                ]
+            }
+        },
+        "/payments/webhook": {
+            "post": {
+                "description": "Receives Stripe webhook events. Verifies the `stripe-signature` header and processes `payment_intent.succeeded` to mark the order as paid and forward it to Toptex. **Do not call this endpoint manually** — it is intended for Stripe only.",
+                "operationId": "PaymentsController_handleWebhook",
+                "parameters": [
+                    {
+                        "name": "stripe-signature",
+                        "required": true,
+                        "in": "header",
+                        "description": "Stripe webhook signature (set automatically by Stripe)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Webhook received and processed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "received": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Stripe signature or malformed payload"
+                    }
+                },
+                "summary": "Stripe webhook endpoint",
+                "tags": [
+                    "Payments"
+                ]
+            }
+        },
+        "/reviews": {
+            "post": {
+                "description": "🔒 **Authenticated users only.** Creates a new review for a product. Each user can only submit **one review per product**. Rating must be between 1 and 5.",
+                "operationId": "ReviewsController_create",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "productId",
+                                    "rating"
+                                ],
+                                "properties": {
+                                    "productId": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "uuid-here"
+                                    },
+                                    "rating": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 5,
+                                        "example": 4
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Great quality, fast shipping!"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Review created successfully."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "404": {
+                        "description": "Product not found."
+                    },
+                    "409": {
+                        "description": "You have already reviewed this product."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Submit a review for a product",
+                "tags": [
+                    "Reviews"
+                ]
+            },
+            "get": {
+                "description": "🔴 **Admin only.** Returns every review across all products and users, ordered by most recent first. Includes reviewer info and product reference.",
+                "operationId": "ReviewsController_findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Full list of all reviews, newest first."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "403": {
+                        "description": "Authenticated user is not an admin."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "[Admin] Get all reviews",
+                "tags": [
+                    "Reviews"
+                ]
+            }
+        },
+        "/reviews/product/{productId}": {
+            "get": {
+                "description": "🌐 **Public — no authentication required.** Returns all approved reviews for a given product, ordered by most recent first. Includes reviewer first and last name.",
+                "operationId": "ReviewsController_findAllByProduct",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the product to fetch reviews for",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of reviews for the product, newest first."
+                    },
+                    "404": {
+                        "description": "Product not found."
+                    }
+                },
+                "summary": "Get all reviews for a product",
+                "tags": [
+                    "Reviews"
+                ]
+            }
+        },
+        "/reviews/{id}": {
+            "patch": {
+                "description": "🔒 **Authenticated users only — owner only.** Allows a user to edit the rating or comment of a review they previously submitted. Users cannot edit reviews that belong to other users.",
+                "operationId": "ReviewsController_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the review to update",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 5,
+                                        "example": 5
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Updated — even better than I thought!"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Review updated successfully."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "403": {
+                        "description": "You can only edit your own reviews."
+                    },
+                    "404": {
+                        "description": "Review not found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update your own review",
+                "tags": [
+                    "Reviews"
+                ]
+            },
+            "delete": {
+                "description": "🔒 **Authenticated users — owner or admin.** Deletes a review by ID. - **Regular users** can only delete their own reviews. - **Admins** can delete any review regardless of ownership.",
+                "operationId": "ReviewsController_remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the review to delete",
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review deleted successfully."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "403": {
+                        "description": "You can only delete your own reviews."
+                    },
+                    "404": {
+                        "description": "Review not found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Delete a review",
+                "tags": [
+                    "Reviews"
+                ]
+            }
+        },
+        "/wishlist": {
+            "post": {
+                "description": "🔒 **Authenticated users only.** Adds a product to the current user's wishlist. Each product can only appear **once** per user.",
+                "operationId": "WishlistController_add",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "productId"
+                                ],
+                                "properties": {
+                                    "productId": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "uuid-here"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product added to wishlist."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "404": {
+                        "description": "Product not found."
+                    },
+                    "409": {
+                        "description": "Product already in wishlist."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Add a product to the wishlist",
+                "tags": [
+                    "Wishlist"
+                ]
+            },
+            "get": {
+                "description": "🔒 **Authenticated users only.** Returns all products in the current user's wishlist, ordered by most recently added.",
+                "operationId": "WishlistController_findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Wishlist retrieved successfully."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get all wishlist items",
+                "tags": [
+                    "Wishlist"
+                ]
+            }
+        },
+        "/wishlist/clear": {
+            "delete": {
+                "description": "🔒 **Authenticated users only.** Removes all products from the current user's wishlist.",
+                "operationId": "WishlistController_clear",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Wishlist cleared."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Clear the entire wishlist",
+                "tags": [
+                    "Wishlist"
+                ]
+            }
+        },
+        "/wishlist/{productId}": {
+            "delete": {
+                "description": "🔒 **Authenticated users only.** Removes a specific product from the current user's wishlist.",
+                "operationId": "WishlistController_remove",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product removed from wishlist."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    },
+                    "404": {
+                        "description": "Product not found in wishlist."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Remove a product from the wishlist",
+                "tags": [
+                    "Wishlist"
+                ]
+            }
+        },
+        "/wishlist/merge": {
+            "post": {
+                "description": "🔒 **Authenticated users only.** Merges an array of product IDs into the current user's wishlist. Duplicates are silently skipped.",
+                "operationId": "WishlistController_merge",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "productIds"
+                                ],
+                                "properties": {
+                                    "productIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "example": [
+                                            "uuid-1",
+                                            "uuid-2"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Wishlist merged successfully."
+                    },
+                    "401": {
+                        "description": "Missing or invalid JWT token."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Merge local wishlist into server wishlist",
+                "tags": [
+                    "Wishlist"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "Koletex API",
+        "description": "Koletex ecommerce API with TopTex integration",
+        "version": "1.0",
+        "contact": {}
+    },
+    "tags": [],
+    "servers": [],
+    "components": {
+        "securitySchemes": {
+            "bearer": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http"
+            }
+        },
+        "schemas": {
+            "RegisterDto": {
+                "type": "object",
+                "properties": {
+                    "firstName": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "john.doe@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "password123",
+                        "minLength": 8
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "example": "+1234567890"
+                    }
+                },
+                "required": [
+                    "firstName",
+                    "lastName",
+                    "email",
+                    "password"
+                ]
+            },
+            "VerifyEmailDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "john.doe@example.com"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "123456"
+                    }
+                },
+                "required": [
+                    "email",
+                    "code"
+                ]
+            },
+            "LoginDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "john.doe@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "password123"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ]
+            },
+            "ForgotPasswordDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "john.doe@example.com"
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
+            "ResetPasswordDto": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "example": "abc123token..."
+                    },
+                    "newPassword": {
+                        "type": "string",
+                        "example": "newpassword123",
+                        "minLength": 8
+                    }
+                },
+                "required": [
+                    "token",
+                    "newPassword"
+                ]
+            },
+            "ResendVerificationDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "john.doe@example.com"
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
+            "ChangePasswordDto": {
+                "type": "object",
+                "properties": {
+                    "oldPassword": {
+                        "type": "string",
+                        "example": "OldPassword123"
+                    },
+                    "newPassword": {
+                        "type": "string",
+                        "example": "NewPassword456",
+                        "minLength": 8
+                    }
+                },
+                "required": [
+                    "oldPassword",
+                    "newPassword"
+                ]
+            },
+            "GoogleAuthDto": {
+                "type": "object",
+                "properties": {
+                    "idToken": {
+                        "type": "string",
+                        "description": "Google ID token received from the frontend after Google sign-in"
+                    }
+                },
+                "required": [
+                    "idToken"
+                ]
+            },
+            "UpdateMeDto": {
+                "type": "object",
+                "properties": {
+                    "firstName": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "example": "+1234567890"
+                    }
+                }
+            },
+            "UpdateMePasswordDto": {
+                "type": "object",
+                "properties": {
+                    "currentPassword": {
+                        "type": "string",
+                        "example": "currentPassword123"
+                    },
+                    "newPassword": {
+                        "type": "string",
+                        "example": "newPassword123",
+                        "minLength": 8
+                    }
+                },
+                "required": [
+                    "currentPassword",
+                    "newPassword"
+                ]
+            },
+            "UpdateMeEmailDto": {
+                "type": "object",
+                "properties": {
+                    "newEmail": {
+                        "type": "string",
+                        "example": "newemail@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "myPassword123"
+                    }
+                },
+                "required": [
+                    "newEmail",
+                    "password"
+                ]
+            },
+            "AdminUpdateUserDto": {
+                "type": "object",
+                "properties": {
+                    "firstName": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "example": "+1234567890"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "CUSTOMER",
+                            "ADMIN"
+                        ]
+                    }
+                }
+            },
+            "SyncToptexDto": {
+                "type": "object",
+                "properties": {
+                    "continue": {
+                        "type": "boolean",
+                        "description": "Whether to continue from a previous sync page. If false, wipes all data.",
+                        "default": false
+                    },
+                    "page": {
+                        "type": "number",
+                        "description": "The page number to continue from. Required if continue is true.",
+                        "minimum": 1
+                    }
+                }
+            },
+            "IncrementalSyncDto": {
+                "type": "object",
+                "properties": {
+                    "modifiedSince": {
+                        "type": "string",
+                        "description": "Only sync products modified since this date (e.g. "2026-01-01")"
+                    }
+                }
+            },
+            "DeletedSyncDto": {
+                "type": "object",
+                "properties": {
+                    "deletedSince": {
+                        "type": "string",
+                        "description": "Only fetch items deleted since this date (e.g. "2026-01-01"). Defaults to last_deleted_sync setting."
+                    }
+                }
+            },
+            "UpdateAddressDto": {
+                "type": "object",
+                "properties": {}
+            },
+            "UpdateOrderStatusDto": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    }
+}

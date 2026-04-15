@@ -5,6 +5,8 @@ import {
   Min,
   Max,
   IsUUID,
+  IsBoolean,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { OrderStatus } from '@prisma/client';
@@ -50,4 +52,10 @@ export class GetAdminOrdersQueryDto {
 export class UpdateOrderStatusDto {
   @IsEnum(OrderStatus)
   status!: OrderStatus;
+}
+
+export class ForwardOrderDto {
+  @IsBoolean()
+  @IsNotEmpty()
+  testMode!: boolean;
 }

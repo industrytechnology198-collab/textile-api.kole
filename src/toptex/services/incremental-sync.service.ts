@@ -16,7 +16,7 @@ const TOPTEX_PRODUCTS_URL = 'https://api.toptex.io/v3/products/all';
 const TOPTEX_DELETED_URL = 'https://api.toptex.io/v3/products/deleted';
 const SETTING_UPSERT = 'last_upsert_sync';
 const SETTING_DELETED = 'last_deleted_sync';
-const LANGS: string[] = ['en', 'fr', 'de'];
+const LANGS: string[] = ['en', 'fr', 'de', 'nl'];
 
 function parseDate(value: string | null | undefined): Date | null {
   if (!value) return null;
@@ -35,7 +35,7 @@ function firstString(
   }
   if (typeof value === 'object' && !Array.isArray(value)) {
     const t = value;
-    return t.en || t.fr || t.de || '';
+    return t.en || t.fr || t.de || t.nl || '';
   }
   return String(value);
 }

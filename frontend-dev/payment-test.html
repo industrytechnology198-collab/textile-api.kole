@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment Test — Koletex Dev</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container { max-width: 560px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 32px; }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .card h2 { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+    input, select {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 14px; color: #111827;
+      margin-bottom: 14px; outline: none;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus { border-color: #6366f1; }
+
+    .btn {
+      width: 100%; padding: 12px;
+      border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #4f46e5; }
+    .btn-green { background: #10b981; color: #fff; margin-top: 10px; }
+    .btn-green:hover:not(:disabled) { background: #059669; }
+
+    #card-element {
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      background: #ede9fe; color: #7c3aed;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    /* Logs */
+    #logs {
+      background: #0f172a; border-radius: 12px;
+      padding: 20px; min-height: 200px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px; line-height: 1.7;
+      overflow-y: auto; max-height: 400px;
+    }
+    .log-info    { color: #94a3b8; }
+    .log-success { color: #34d399; }
+    .log-error   { color: #f87171; }
+    .log-warn    { color: #fbbf24; }
+    .log-data    { color: #7dd3fc; }
+    .log-label   { color: #c084fc; font-weight: bold; }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; margin-left: 8px;
+    }
+    .pill-pending    { background: #fef3c7; color: #92400e; }
+    .pill-paid       { background: #d1fae5; color: #065f46; }
+    .pill-processing { background: #dbeafe; color: #1e40af; }
+
+    .result-box {
+      background: #f8fafc; border: 1px solid #e2e8f0;
+      border-radius: 8px; padding: 12px;
+      font-size: 12px; font-family: monospace;
+      color: #334155; white-space: pre-wrap;
+      margin-top: 10px; display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>💳 Payment Test — Koletex Dev</h1>
+  <p class="subtitle">Full payment flow without any terminal commands</p>
+
+  <!-- STEP 1: Login -->
+  <div class="card">
+    <span class="step-badge">STEP 1</span>
+    <h2>Login</h2>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="your@email.com" />
+    <label>Password</label>
+    <input id="password" type="password" placeholder="••••••••" />
+    <button class="btn btn-primary" onclick="login()">Login & get token</button>
+    <div class="result-box" id="login-result"></div>
+  </div>
+
+  <!-- STEP 2: Create Order -->
+  <div class="card">
+    <span class="step-badge">STEP 2</span>
+    <h2>Create Order</h2>
+    <label>Test Mode</label>
+    <select id="testMode">
+      <option value="true">true — test order (safe)</option>
+      <option value="false">false — real order (production)</option>
+    </select>
+    <button class="btn btn-primary" id="order-btn" onclick="createOrder()">Create Order from cart</button>
+    <div class="result-box" id="order-result"></div>
+  </div>
+
+  <!-- STEP 3: Pay -->
+  <div class="card">
+    <span class="step-badge">STEP 3</span>
+    <h2>Pay</h2>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#92400e;">
+      Fill <strong>all 3 fields</strong> in the card box below:<br/>
+      &nbsp;&nbsp;• Card number: <strong>4242 4242 4242 4242</strong><br/>
+      &nbsp;&nbsp;• Expiry: any future date (e.g. <strong>12/29</strong>)<br/>
+      &nbsp;&nbsp;• CVC: any 3 digits (e.g. <strong>123</strong>)
+    </div>
+    <div id="card-element"></div>
+    <button class="btn btn-green" id="pay-btn" onclick="pay()" disabled>Pay Now</button>
+    <div class="result-box" id="pay-result"></div>
+  </div>
+
+  <!-- STEP 4: Verify -->
+  <div class="card">
+    <span class="step-badge">STEP 4</span>
+    <h2>Verify Order</h2>
+    <button class="btn btn-primary" onclick="verifyOrder()">Check order status</button>
+    <div class="result-box" id="verify-result"></div>
+  </div>
+
+  <!-- LOGS -->
+  <div class="card">
+    <h2 style="margin-bottom:12px;">📋 Logs</h2>
+    <div id="logs"><span class="log-info">Waiting for actions...</span></div>
+  </div>
+</div>
+
+<script>
+  const BASE = 'http://localhost:4873';
+  const STRIPE_PK = 'pk_test_51M9QzgK3k8GTMgXmazLZ9mDeAMYdf4Wpdce6YfS7gXVCv8B6iC0tVWGOmAk6gQYP0esjeB6W3DnsxrgQkwPdcQ6T00htgs0TUy';
+
+  let token = '';
+  let orderId = '';
+  let stripe = null;
+  let cardElement = null;
+  let clientSecret = '';
+
+  // ─── Logging ──────────────────────────────────
+  function log(msg, type = 'info') {
+    const el = document.getElementById('logs');
+    const time = new Date().toLocaleTimeString();
+    el.innerHTML += `\n<span class="log-${type}">[${time}] ${msg}</span>`;
+    el.scrollTop = el.scrollHeight;
+  }
+  function logData(label, data) {
+    const el = document.getElementById('logs');
+    const time = new Date().toLocaleTimeString();
+    el.innerHTML += `\n<span class="log-label">[${time}] ${label}</span>\n<span class="log-data">${JSON.stringify(data, null, 2)}</span>`;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  // ─── Init Stripe ──────────────────────────────
+  stripe = Stripe(STRIPE_PK);
+  const elements = stripe.elements();
+  cardElement = elements.create('card', {
+    style: {
+      base: { fontSize: '15px', color: '#1a1a2e', '::placeholder': { color: '#9ca3af' } }
+    }
+  });
+  cardElement.mount('#card-element');
+  log('Stripe card element ready', 'success');
+
+  // ─── Step 1: Login ────────────────────────────
+  async function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    log(`Logging in as ${email}...`);
+    try {
+      const res = await fetch(`${BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Login failed');
+      token = data.accessToken;
+      log('Login successful ✅', 'success');
+      logData('Token (first 40 chars)', token.substring(0, 40) + '...');
+      show('login-result', { status: '✅ Logged in', tokenPreview: token.substring(0, 40) + '...' });
+    } catch (e) {
+      log('Login failed: ' + e.message, 'error');
+      show('login-result', { error: e.message });
+    }
+  }
+
+  // ─── Step 2: Create Order ─────────────────────
+  async function createOrder() {
+    if (!token) { log('Login first!', 'warn'); return; }
+    const orderBtn = document.getElementById('order-btn');
+    orderBtn.disabled = true;
+    orderBtn.textContent = 'Creating...';
+    const testMode = document.getElementById('testMode').value === 'true';
+    log(`Creating order (testMode: ${testMode})...`);
+    try {
+      const res = await fetch(`${BASE}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ testMode })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data));
+      orderId = data.id;
+      log(`Order created ✅ — ID: ${orderId}`, 'success');
+      logData('Order', data);
+      show('order-result', data);
+      orderBtn.textContent = '✅ Order created';
+
+      // Auto create payment intent
+      log('Creating payment intent...');
+      const piRes = await fetch(`${BASE}/payments/create-intent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ orderId })
+      });
+      const piData = await piRes.json();
+      if (!piRes.ok) throw new Error(JSON.stringify(piData));
+      clientSecret = piData.clientSecret;
+      log(`Payment intent ready ✅ — fill card details below and click Pay Now`, 'success');
+      logData('Payment Intent', { clientSecret: clientSecret.split('_secret_')[0] + '_secret_***' });
+      document.getElementById('pay-btn').disabled = false;
+    } catch (e) {
+      log('Error: ' + e.message, 'error');
+      show('order-result', { error: e.message });
+      orderBtn.disabled = false;
+      orderBtn.textContent = 'Create Order from cart';
+    }
+  }
+
+  // ─── Step 3: Pay ──────────────────────────────
+  async function pay() {
+    if (!clientSecret) { log('Create order first!', 'warn'); return; }
+    log('Confirming payment with Stripe...');
+    document.getElementById('pay-btn').disabled = true;
+    try {
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: cardElement }
+      });
+      if (result.error) {
+        log('Payment failed: ' + result.error.message, 'error');
+        show('pay-result', { error: result.error.message });
+        document.getElementById('pay-btn').disabled = false;
+      } else {
+        log('Payment succeeded ✅ — Stripe status: ' + result.paymentIntent.status, 'success');
+        log('Webhook will fire automatically → order will update to isPaid: true', 'warn');
+        logData('PaymentIntent', { id: result.paymentIntent.id, status: result.paymentIntent.status, amount: result.paymentIntent.amount });
+        show('pay-result', { status: '✅ Payment succeeded', stripeStatus: result.paymentIntent.status });
+        // Auto verify after 2s to give webhook time
+        log('Waiting 2s for webhook to process...', 'warn');
+        setTimeout(verifyOrder, 2000);
+      }
+    } catch (e) {
+      log('Error: ' + e.message, 'error');
+      document.getElementById('pay-btn').disabled = false;
+    }
+  }
+
+  // ─── Step 4: Verify ───────────────────────────
+  async function verifyOrder() {
+    if (!orderId || !token) { log('Complete steps 1-3 first!', 'warn'); return; }
+    log(`Checking order ${orderId}...`);
+    try {
+      const res = await fetch(`${BASE}/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data));
+      const isPaid = data.isPaid;
+      const status = data.status;
+      log(`isPaid: ${isPaid} | status: ${status}`, isPaid ? 'success' : 'warn');
+      logData('Order result', { isPaid, status, toptexOrderId: data.toptexOrderId });
+      show('verify-result', data);
+      if (!isPaid) {
+        log('isPaid is still false — webhook may not have fired yet. Click "Check order status" again in a few seconds.', 'warn');
+      }
+    } catch (e) {
+      log('Error: ' + e.message, 'error');
+    }
+  }
+
+  function show(id, data) {
+    const el = document.getElementById(id);
+    el.style.display = 'block';
+    el.textContent = JSON.stringify(data, null, 2);
+  }
+</script>
+</body>
+</html>

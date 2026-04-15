@@ -28,8 +28,8 @@ export class OrderService {
     private readonly adminGetAllToptexOrdersHandler: AdminGetAllToptexOrdersHandler,
   ) {}
 
-  createOrder(userId: string) {
-    return this.createOrderHandler.execute(userId);
+  createOrder(userId: string, testMode: boolean) {
+    return this.createOrderHandler.execute(userId, testMode);
   }
 
   getOrders(userId: string, query: GetOrdersQueryDto) {
@@ -52,8 +52,8 @@ export class OrderService {
     return this.adminUpdateOrderStatusHandler.execute(id, status);
   }
 
-  adminForwardToToptex(id: string) {
-    return this.adminForwardOrderHandler.execute(id);
+  adminForwardToToptex(id: string, testMode: boolean) {
+    return this.adminForwardOrderHandler.execute(id, testMode);
   }
 
   adminGetToptexOrder(id: string) {

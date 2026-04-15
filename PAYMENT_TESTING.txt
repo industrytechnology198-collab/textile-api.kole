@@ -1,0 +1,107 @@
+=====================================
+  PAYMENT TESTING GUIDE — Koletex
+=====================================
+
+PREREQUISITES
+--------------
+Terminal 1 (server):
+  yarn start:dev
+
+Terminal 2 (Stripe CLI):
+  cd C:\Users\HASSOUBI\Downloads
+  .\stripe listen --forward-to localhost:4873/payments/webhook
+
+
+-------------------------------------
+STEP 1 — Login & get JWT token
+-------------------------------------
+POST http://localhost:4873/auth/login
+Content-Type: application/json
+
+Body:
+{
+  "email": "your@email.com",
+  "password": "yourpassword"
+}
+
+-> Copy the "accessToken" from the response.
+
+
+-------------------------------------
+STEP 2 — Create an order
+-------------------------------------
+POST http://localhost:4873/orders
+Authorization: Bearer <accessToken>
+
+-> Copy the "id" from the response. Example:
+   3f615bd3-f68b-4ff7-86d9-3560f0a613a7
+
+
+-------------------------------------
+STEP 3 — Create a PaymentIntent
+-------------------------------------
+POST http://localhost:4873/payments/create-intent
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+
+Body:
+{
+  "orderId": "<order_id from Step 2>"
+}
+
+Response:
+{
+  "clientSecret": "pi_3TKSFqK3k8GTMgXm0xxxxxxxx_secret_xxxxxxxx"
+}
+
+-> Copy the part BEFORE "_secret_"
+   Example: pi_3TKSFqK3k8GTMgXm0xxxxxxxx
+
+
+-------------------------------------
+STEP 4 — Confirm the payment (Terminal)
+-------------------------------------
+cd C:\Users\HASSOUBI\Downloads
+
+.\stripe payment_intents confirm pi_3TKSFqK3k8GTMgXm0xxxxxxxx --payment-method pm_card_visa
+
+Replace pi_3TKSFqK3k8GTMgXm0xxxxxxxx with your actual PaymentIntent ID.
+
+-> Watch Terminal 2 (Stripe CLI) for:
+   --> payment_intent.succeeded   [200 OK]
+
+
+-------------------------------------
+STEP 5 — Verify the order (Terminal)
+-------------------------------------
+Replace <accessToken> and <order_id> with your actual values.
+
+Windows PowerShell:
+
+$token = "<accessToken>"
+$orderId = "<order_id>"
+Invoke-RestMethod -Uri "http://localhost:4873/orders/$orderId" `
+  -Method GET `
+  -Headers @{ Authorization = "Bearer $token" } |
+  ConvertTo-Json -Depth 5
+
+Expected result:
+{
+  "id": "<order_id>",
+  "isPaid": true,
+  "status": "PROCESSING",
+  "toptexOrderId": "..."
+}
+
+
+-------------------------------------
+WHAT HAPPENS AUTOMATICALLY (Step 4)
+-------------------------------------
+Stripe CLI fires webhook
+  -> POST /payments/webhook
+  -> Signature verified
+  -> order.isPaid    = true
+  -> order.status    = PROCESSING
+  -> Order forwarded to Toptex automatically
+
+=====================================

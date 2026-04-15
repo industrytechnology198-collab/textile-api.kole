@@ -76,6 +76,12 @@ export class ToptexRepository {
     });
   }
 
+  async findProductByRef(ref: string): Promise<any> {
+    return this.prisma.product.findUnique({
+      where: { catalogReference: ref },
+    });
+  }
+
   async upsertProductCategory(
     productId: string,
     categoryId: string,

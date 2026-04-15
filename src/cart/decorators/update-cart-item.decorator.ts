@@ -5,13 +5,20 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 export function ApiUpdateCartItem() {
   return applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'Update quantity of a cart item' }),
-    ApiParam({ name: 'skuId', type: 'string', format: 'uuid' }),
+    ApiOperation({
+      summary: 'Update quantity of a cart item',
+      description:
+        '🔒 **Authenticated users only.**\n\n' +
+        'Updates the quantity of a specific SKU already in the cart. ' +
+        'Stock availability is re-validated against the new quantity.',
+    }),
+    ApiParam({ name: 'skuId', type: 'string', format: 'uuid', description: 'SKU ID of the cart item to update' }),
     ApiBody({
       schema: {
         type: 'object',
@@ -21,6 +28,7 @@ export function ApiUpdateCartItem() {
         },
       },
     }),
-    ApiOkResponse({ description: 'Cart item updated. Returns full cart.' }),
+    ApiOkResponse({ description: 'Cart item updated. Returns the full updated cart.' }),
+    ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' }),
   );
 }

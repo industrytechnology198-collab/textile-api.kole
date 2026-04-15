@@ -11,6 +11,8 @@ import { AddressModule } from './address/address.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { PaymentsModule } from './payments/payments.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -27,6 +29,8 @@ import { RolesGuard } from './auth/guards/roles.guard';
     CartModule,
     OrderModule,
     PaymentsModule,
+    ReviewsModule,
+    WishlistModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

@@ -16,7 +16,7 @@ export class AdminForwardOrderHandler {
     private readonly toptexOrderService: ToptexOrderService,
   ) {}
 
-  async execute(id: string) {
+  async execute(id: string, testMode: boolean) {
     const order = await this.orderRepository.findByIdWithItems(id);
 
     if (!order) {
@@ -39,7 +39,7 @@ export class AdminForwardOrderHandler {
       throw new NotFoundException('User not found');
     }
 
-    const payload = buildToptexPayloadFromOrder(order, address, user);
+    const payload = buildToptexPayloadFromOrder(order, address, user, testMode);
     const response = await this.toptexOrderService.createOrder(payload);
 
     const updatedOrder = await this.orderRepository.updateOrder(id, {

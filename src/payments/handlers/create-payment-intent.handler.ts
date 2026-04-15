@@ -41,6 +41,7 @@ export class CreatePaymentIntentHandler {
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: Math.round(Number(order.totalPrice) * 100),
       currency: 'eur',
+      payment_method_types: ['card'],
       metadata: { orderId: order.id, userId },
     });
 
