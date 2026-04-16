@@ -13,9 +13,9 @@ import {
 import { Type, Transform } from 'class-transformer';
 
 export class GetProductsDto {
-  @ApiProperty({ description: 'Language ("en" | "fr" | "de")' })
+  @ApiProperty({ description: 'Language ("en" | "fr" | "de" | "nl")' })
   @IsString()
-  @IsIn(['en', 'fr', 'de'])
+  @IsIn(['en', 'fr', 'de', 'nl'])
   lang!: string;
 
   @ApiPropertyOptional()
