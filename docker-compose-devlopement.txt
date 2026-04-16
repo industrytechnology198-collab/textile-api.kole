@@ -1,9 +1,13 @@
+version: '3.8'
+
 services:
   # ── PostgreSQL ───────────────────────────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
     container_name: app_db
     restart: always
+    ports:
+      - '5543:5432'
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -26,6 +30,8 @@ services:
       target: production
     container_name: koletex_api
     restart: always
+    ports:
+      - '4873:4873'
     env_file:
       - .env
     environment:
@@ -55,7 +61,7 @@ services:
       - external
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
-  # ── Certbot (SSL) ────────────────────────────────────────────────────────────
+  # ── Certbot (SSL) ─────────────────────────────────────────────────────────────
   certbot:
     image: certbot/certbot
     container_name: certbot
@@ -64,7 +70,7 @@ services:
       - ./nginx/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
-  # ── Prisma Studio ────────────────────────────────────────────────────────────
+  # ── Prisma Studio ─────────────────────────────────────────────────────────────
   prisma-studio:
     build:
       context: .
@@ -72,6 +78,8 @@ services:
       target: builder
     container_name: prisma_studio
     restart: always
+    ports:
+      - '5555:5555'
     env_file:
       - .env
     environment:
@@ -82,8 +90,9 @@ services:
         condition: service_healthy
     networks:
       - internal
+      - external
+    # Only accessible via Nginx — not exposed to host directly
 
-  # ── Startup Logger ───────────────────────────────────────────────────────────
   startup_logger:
     image: alpine
     container_name: koletex_startup_logger
@@ -98,9 +107,9 @@ services:
       echo '=================================================================' &&
       echo '  Koletex API is up and running!' &&
       echo '=================================================================' &&
-      echo '  API URL:          https://apitextile.kole.be' &&
-      echo '  Swagger URL:      https://apitextile.kole.be/api' &&
-      echo '  Prisma Studio:    internal only (no public access)' &&
+      echo '  API URL:          http://localhost:4873' &&
+      echo '  Swagger URL:      http://localhost:4873/api' &&
+      echo '  Prisma Studio:    http://localhost:5555' &&
       echo '=================================================================' &&
       echo ''
       "

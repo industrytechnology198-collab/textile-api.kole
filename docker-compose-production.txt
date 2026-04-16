@@ -27,7 +27,7 @@ services:
     container_name: koletex_api
     restart: always
     env_file:
-      - .env
+      - .env.production
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
     depends_on:
@@ -73,7 +73,7 @@ services:
     container_name: prisma_studio
     restart: always
     env_file:
-      - .env
+      - .env.production
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
     command: ["npx", "prisma", "studio", "--port", "5555", "--browser", "none"]
@@ -98,8 +98,8 @@ services:
       echo '=================================================================' &&
       echo '  Koletex API is up and running!' &&
       echo '=================================================================' &&
-      echo '  API URL:          https://apitextile.kole.be' &&
-      echo '  Swagger URL:      https://apitextile.kole.be/api' &&
+      echo '  API URL:          https://textile-api.kole.be' &&
+      echo '  Swagger URL:      https://textile-api.kole.be/api' &&
       echo '  Prisma Studio:    internal only (no public access)' &&
       echo '=================================================================' &&
       echo ''
