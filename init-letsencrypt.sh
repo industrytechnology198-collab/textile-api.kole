@@ -3,8 +3,8 @@
 # Run this ONCE on your VPS before starting the full stack.
 # It gets your SSL certificate from Let's Encrypt.
 
-DOMAIN="apitextile.kole.be"
-EMAIL="your-email@example.com"   # <-- change this to your real email
+DOMAIN="textile-api.kole.be"
+EMAIL="zakariyazouazou@gmail.com"   # <-- change this to your real email
 
 # Directories
 mkdir -p ./nginx/certbot/conf
