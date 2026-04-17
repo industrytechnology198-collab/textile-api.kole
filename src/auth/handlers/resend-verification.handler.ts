@@ -29,7 +29,7 @@ export class ResendVerificationHandler {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await this.authRepository.createEmailVerification(user.id, code, expiresAt);
-    await this.emailService.sendVerificationEmail(user.email, code);
+    await this.emailService.sendVerificationEmail(user.email, code, user.preferredLanguage ?? 'nl');
 
     return SAFE_RESPONSE;
   }

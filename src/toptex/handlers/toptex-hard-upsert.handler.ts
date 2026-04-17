@@ -95,6 +95,11 @@ export class ToptexHardUpsertHandler {
           this.logger.debug(`Fetching page ${page} (Attempt ${retries + 1}/3)...`);
           data = await this.fetchPage(page);
 
+          // Normalize: API returns [] (empty array) when there are no more pages
+          if (Array.isArray(data) && data.length === 0) {
+            data = { items: [], total_count: 0 };
+          }
+
           if (!data || !data.items || !Array.isArray(data.items)) {
             throw new Error(
               `Data items is not iterable. Raw data: ${JSON.stringify(data).substring(0, 500)}`,

@@ -18,6 +18,7 @@ import { GetUsersQueryDto } from './dto/get-users.dto';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { UpdateMePasswordDto } from './dto/update-me-password.dto';
 import { UpdateMeEmailDto } from './dto/update-me-email.dto';
+import { UpdateMeLanguageDto } from './dto/update-me-language.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ApiGetUsers } from './decorators/get-users.decorator';
 import { ApiGetUser } from './decorators/get-user.decorator';
@@ -26,6 +27,7 @@ import { ApiUpdateUser } from './decorators/update-user.decorator';
 import { ApiUpdateMe } from './decorators/update-me.decorator';
 import { ApiUpdateMePassword } from './decorators/update-me-password.decorator';
 import { ApiUpdateMeEmail } from './decorators/update-me-email.decorator';
+import { ApiUpdateMeLanguage } from './decorators/update-me-language.decorator';
 import { ApiDeleteUser } from './decorators/delete-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -70,6 +72,16 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
   ) {
     return this.userService.updateMeEmail(user.userId, dto, res);
+  }
+
+ 
+  @Patch('me/language')
+  @ApiUpdateMeLanguage()
+  updateMeLanguage(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateMeLanguageDto,
+  ) {
+    return this.userService.updateMeLanguage(user.userId, dto);
   }
 
   @Get()

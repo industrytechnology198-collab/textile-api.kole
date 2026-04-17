@@ -10,8 +10,10 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001' , 
-    'https://textile.kole.be'
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://textile.kole.be',
     ],
     credentials: true,
   });
@@ -34,8 +36,8 @@ async function bootstrap() {
     jsonDocumentUrl: 'api-json', // 👈 THIS is what you need
   });
 
-  const port = process.env.PORT || 4873;
-  // const port = 4877
+  //const port = process.env.PORT || 4873;
+  const port = 4877;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Swagger docs at: http://localhost:${port}/api`);

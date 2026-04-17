@@ -13,6 +13,7 @@ import { OrderModule } from './order/order.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { QuoteModule } from './quote/quote.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -31,6 +32,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     PaymentsModule,
     ReviewsModule,
     WishlistModule,
+    QuoteModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

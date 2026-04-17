@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: app_db_dev
+    restart: always
+    ports:
+      - '5543:5432'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: koletex_api_dev
+    restart: always
+    ports:
+      - '4873:4873'
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: prisma_studio_dev
+    restart: always
+    ports:
+      - '5555:5555'
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    command: ["npx", "prisma", "studio", "--port", "5555", "--browser", "none"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  startup_logger:
+    image: alpine
+    container_name: koletex_startup_logger_dev
+    restart: "no"
+    depends_on:
+      - app
+      - prisma-studio
+    command: >
+      /bin/sh -c "
+      sleep 5 &&
+      echo '' &&
+      echo '=================================================================' &&
+      echo '  Koletex DEV is up and running!' &&
+      echo '=================================================================' &&
+      echo '  API URL:          http://localhost:4873' &&
+      echo '  Swagger URL:      http://localhost:4873/api' &&
+      echo '  Prisma Studio:    http://localhost:5555' &&
+      echo '  PostgreSQL:       localhost:5543' &&
+      echo '=================================================================' &&
+      echo ''
+      "
+
+volumes:
+  postgres_data_dev:

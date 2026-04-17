@@ -1,0 +1,189 @@
+=========================================================
+  FRONTEND TASKS — User Language Preference (i18n)
+  Default language: NL (Nederlands)
+=========================================================
+
+OVERVIEW
+--------
+The backend now stores each user's preferred language (nl / fr / en / de).
+All transactional emails (verification, password reset, quote confirmation,
+quote status updates) are sent in the user's stored language.
+
+The frontend must:
+  A) Set the language when the user registers (call right after login) (git the language from he local url next translation )
+  B) Let the user change the language from their account settings
+  
+
+
+=========================================================
+  A — SET LANGUAGE AFTER REGISTRATION
+=========================================================
+
+When a new user registers, immediately call PATCH /users/me/language
+with the browser/app language (default: "nl") so future emails
+arrive in the correct language.
+
+WHEN: Right after a successful POST /auth/register + POST /auth/login
+
+ENDPOINT:
+  PATCH /users/me/language
+
+HEADERS:
+  Authorization: Bearer <access_token>
+  Content-Type: application/json
+
+REQUEST BODY:
+  {
+    "preferredLanguage": "nl"
+  }
+
+ALLOWED VALUES: "nl" | "fr" | "en" | "de"
+
+SUCCESS RESPONSE (200):
+  {
+    "id": "...",
+    "email": "...",
+    "firstName": "...",
+    "lastName": "...",
+    "preferredLanguage": "nl",
+    ...
+  }
+
+ERROR RESPONSES:
+  400 Bad Request — if value is not one of nl/fr/en/de
+  401 Unauthorized — if token is missing or expired
+
+EXAMPLE (fetch):
+  await fetch('/users/me/language', {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ preferredLanguage: detectBrowserLang() }),
+  });
+
+  function detectBrowserLang() {
+    const lang = navigator.language?.slice(0, 2); // e.g. "nl", "fr"
+    return ['nl', 'fr', 'en', 'de'].includes(lang) ? lang : 'nl';
+  }
+
+
+=========================================================
+  B — LANGUAGE SELECTOR IN ACCOUNT SETTINGS
+=========================================================
+
+Add a dropdown/selector in the user's account settings page
+(e.g. /account/settings or /profile) that lets the user pick
+their preferred language for emails.
+
+WHEN: User explicitly changes language preference in settings
+
+ENDPOINT:
+  PATCH /users/me/language
+
+HEADERS:
+  Authorization: Bearer <access_token>
+  Content-Type: application/json
+
+REQUEST BODY:
+  {
+    "preferredLanguage": "fr"
+  }
+
+ALLOWED VALUES: "nl" | "fr" | "en" | "de"
+
+SUCCESS RESPONSE (200):
+  {
+    "id": "...",
+    "email": "...",
+    "firstName": "...",
+    "lastName": "...",
+    "preferredLanguage": "fr",
+    ...
+  }
+
+ERROR RESPONSES:
+  400 Bad Request — if value is not one of nl/fr/en/de
+  401 Unauthorized — if token is missing or expired
+
+UI SUGGESTION:
+  Show a label like "Language for emails" with a <select> or flag buttons:
+    🇳🇱 Nederlands (nl)  ← default
+    🇫🇷 Français     (fr)
+    🇬🇧 English      (en)
+    🇩🇪 Deutsch      (de)
+
+  On change → call PATCH /users/me/language → show success toast.
+
+
+=========================================================
+  C — LOAD CURRENT LANGUAGE ON APP START
+=========================================================
+
+When the authenticated user loads the app, fetch their profile
+to get their stored language and pre-select it in the UI.
+
+ENDPOINT:
+  GET /users/me
+
+HEADERS:
+  Authorization: Bearer <access_token>
+
+SUCCESS RESPONSE (200):
+  {
+    "id": "...",
+    "email": "...",
+    "firstName": "...",
+    "lastName": "...",
+    "phoneNumber": "...",
+    "preferredLanguage": "nl",   <-- use this field
+    "role": "CUSTOMER",
+    "isEmailVerified": true,
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+
+HOW TO USE:
+  const me = await fetch('/users/me', { headers: { Authorization: `Bearer ${token}` } });
+  const { preferredLanguage } = await me.json();
+  // Use preferredLanguage to pre-select the dropdown in settings
+
+
+=========================================================
+  SUMMARY TABLE
+=========================================================
+
+  Action                        | Method | Endpoint
+  ------------------------------|--------|---------------------
+  Get current user + language   | GET    | /users/me
+  Set language (registration)   | PATCH  | /users/me/language
+  Update language (settings)    | PATCH  | /users/me/language
+
+  Body for PATCH /users/me/language:
+    { "preferredLanguage": "nl" }   ← nl | fr | en | de
+
+  Default: "nl" (Nederlands)
+
+
+=========================================================
+  WHICH EMAILS ARE AFFECTED
+=========================================================
+
+  Email                     | Sent in user's language?
+  --------------------------|-------------------------
+  Email verification        | YES (after first login)
+  Resend verification       | YES
+  Password reset            | YES
+  Quote confirmation        | YES
+  Quote status update       | YES (admin triggers this)
+
+  NOTE: The very first verification email at registration is sent in "nl"
+  by default (since the user has no token yet to call PATCH /users/me/language
+  before the email goes out). Call PATCH /users/me/language right after
+  the first login to ensure all future emails arrive in the correct language.
+
+=========================================================
+
+
+how to call the api follwo the logic and the structure that you already work with 

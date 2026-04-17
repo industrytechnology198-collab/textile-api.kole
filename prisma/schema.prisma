@@ -24,10 +24,11 @@ model User {
   phoneNumber     String?
   isEmailVerified Boolean  @default(false)
   role            Role     @default(CUSTOMER)
-  googleId        String?  @unique
-  provider        String   @default("local")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  googleId           String?  @unique
+  provider           String   @default("local")
+  preferredLanguage  String   @default("nl")   // "fr" | "en" | "de" | "nl"
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   addresses          Address[]
   orders             Order[]
@@ -37,6 +38,7 @@ model User {
   emailVerifications EmailVerification[]
   refreshTokens      RefreshToken[]
   passwordResets     PasswordReset[]
+  quoteRequests      QuoteRequest[]
 }
 
 model EmailVerification {
@@ -91,7 +93,8 @@ model Address {
   country      String
   isDefault    Boolean @default(false)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quoteRequests QuoteRequest[]
 
   @@index([userId])
 }
@@ -260,9 +263,10 @@ model ProductSku {
   isDiscontinued Boolean  @default(false)
   saleState      String   @default("active")
 
-  color      ProductColor @relation(fields: [colorId], references: [id], onDelete: Cascade)
-  orderItems OrderItem[]
-  cartItems  CartItem[]
+  color           ProductColor      @relation(fields: [colorId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
+  quoteItems      QuoteRequestItem[]
 
   @@index([colorId])
   @@index([sku])
@@ -396,4 +400,50 @@ model SyncLog {
   failedItems    Int?
   errorMessage   String?
   createdAt      DateTime  @default(now())
+}
+
+// ─────────────────────────────────────────────
+// QUOTE REQUESTS  (new order flow — no cart/payment)
+// ─────────────────────────────────────────────
+
+enum QuoteStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model QuoteRequest {
+  id           String      @id @default(uuid()) @db.Uuid
+  userId       String      @db.Uuid
+  addressId    String      @db.Uuid
+  status       QuoteStatus @default(PENDING)
+  totalPrice   Decimal     @db.Decimal(10, 2)
+  note         String?                          // user comment at submission
+  adminNote    String?                          // internal admin note
+  confirmedAt  DateTime?                        // when admin acknowledges
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user    User               @relation(fields: [userId], references: [id])
+  address Address            @relation(fields: [addressId], references: [id])
+  items   QuoteRequestItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model QuoteRequestItem {
+  id             String  @id @default(uuid()) @db.Uuid
+  quoteRequestId String  @db.Uuid
+  skuId          String  @db.Uuid
+  quantity       Int
+  unitPrice      Decimal @db.Decimal(10, 2)  // price snapshot ×2 at submission
+
+  quoteRequest QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade)
+  sku          ProductSku   @relation(fields: [skuId], references: [id])
+
+  @@index([quoteRequestId])
 }

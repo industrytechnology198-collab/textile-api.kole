@@ -11,6 +11,7 @@ const USER_PUBLIC_SELECT = {
   isEmailVerified: true,
   role: true,
   provider: true,
+  preferredLanguage: true,
   createdAt: true,
   updatedAt: true,
 };

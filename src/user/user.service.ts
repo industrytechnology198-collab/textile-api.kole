@@ -8,10 +8,12 @@ import { UpdateMeHandler } from './handlers/update-me.handler';
 import { UpdateMePasswordHandler } from './handlers/update-me-password.handler';
 import { UpdateMeEmailHandler } from './handlers/update-me-email.handler';
 import { DeleteUserHandler } from './handlers/delete-user.handler';
+import { UpdateMeLanguageHandler } from './handlers/update-me-language.handler';
 import { GetUsersQueryDto } from './dto/get-users.dto';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { UpdateMePasswordDto } from './dto/update-me-password.dto';
 import { UpdateMeEmailDto } from './dto/update-me-email.dto';
+import { UpdateMeLanguageDto } from './dto/update-me-language.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 
 @Injectable()
@@ -25,6 +27,7 @@ export class UserService {
     private readonly updateMePasswordHandler: UpdateMePasswordHandler,
     private readonly updateMeEmailHandler: UpdateMeEmailHandler,
     private readonly deleteUserHandler: DeleteUserHandler,
+    private readonly updateMeLanguageHandler: UpdateMeLanguageHandler,
   ) {}
 
   findAll(query: GetUsersQueryDto) {
@@ -45,6 +48,10 @@ export class UserService {
 
   updateMePassword(userId: string, dto: UpdateMePasswordDto, res: Response) {
     return this.updateMePasswordHandler.execute(userId, dto, res);
+  }
+
+  updateMeLanguage(userId: string, dto: UpdateMeLanguageDto) {
+    return this.updateMeLanguageHandler.execute(userId, dto);
   }
 
   updateMeEmail(userId: string, dto: UpdateMeEmailDto, res: Response) {

@@ -37,7 +37,7 @@ export class ForgotPasswordHandler {
       hashedToken,
       expiresAt,
     );
-    await this.emailService.sendPasswordResetEmail(user.email, rawToken);
+    await this.emailService.sendPasswordResetEmail(user.email, rawToken, user.preferredLanguage ?? 'nl');
 
     return SAFE_RESPONSE;
   }
