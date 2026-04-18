@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class GetUsersQueryDto {
@@ -16,4 +16,9 @@ export class GetUsersQueryDto {
   @IsNumber()
   @Min(1)
   limit?: number = 20;
+
+  @ApiPropertyOptional({ example: 'john', description: 'Search by email, first name or last name (case-insensitive)' })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

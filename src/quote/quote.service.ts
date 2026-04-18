@@ -7,6 +7,7 @@ import { CreateQuoteHandler } from './handlers/create-quote.handler';
 import { GetMyQuotesHandler } from './handlers/get-my-quotes.handler';
 import { GetMyQuoteByIdHandler } from './handlers/get-my-quote-by-id.handler';
 import { AdminGetAllQuotesHandler } from './handlers/admin-get-all-quotes.handler';
+import { AdminGetQuoteByIdHandler } from './handlers/admin-get-quote-by-id.handler';
 import { AdminUpdateQuoteStatusHandler } from './handlers/admin-update-quote-status.handler';
 import { AdminUpdateQuoteNoteHandler } from './handlers/admin-update-quote-note.handler';
 
@@ -17,6 +18,7 @@ export class QuoteService {
     private readonly getMyQuotesHandler: GetMyQuotesHandler,
     private readonly getMyQuoteByIdHandler: GetMyQuoteByIdHandler,
     private readonly adminGetAllQuotesHandler: AdminGetAllQuotesHandler,
+    private readonly adminGetQuoteByIdHandler: AdminGetQuoteByIdHandler,
     private readonly adminUpdateQuoteStatusHandler: AdminUpdateQuoteStatusHandler,
     private readonly adminUpdateQuoteNoteHandler: AdminUpdateQuoteNoteHandler,
   ) {}
@@ -35,6 +37,10 @@ export class QuoteService {
 
   adminGetAllQuotes(query: AdminGetQuotesQueryDto) {
     return this.adminGetAllQuotesHandler.execute(query);
+  }
+
+  adminGetQuoteById(id: string) {
+    return this.adminGetQuoteByIdHandler.execute(id);
   }
 
   adminUpdateQuoteStatus(id: string, dto: AdminUpdateQuoteStatusDto) {

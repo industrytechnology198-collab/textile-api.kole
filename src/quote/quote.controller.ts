@@ -23,6 +23,7 @@ import { ApiCreateQuote } from './decorators/create-quote.decorator';
 import { ApiGetMyQuotes, ApiGetMyQuoteById } from './decorators/get-my-quotes.decorator';
 import {
   ApiAdminGetAllQuotes,
+  ApiAdminGetQuoteById,
   ApiAdminUpdateQuoteStatus,
   ApiAdminUpdateQuoteNote,
 } from './decorators/admin-quote.decorator';
@@ -69,6 +70,13 @@ export class QuoteController {
   @ApiAdminGetAllQuotes()
   adminGetAllQuotes(@Query() query: AdminGetQuotesQueryDto) {
     return this.quoteService.adminGetAllQuotes(query);
+  }
+
+  @Get('admin/:id')
+  @Roles(Role.ADMIN)
+  @ApiAdminGetQuoteById()
+  adminGetQuoteById(@Param('id') id: string) {
+    return this.quoteService.adminGetQuoteById(id);
   }
 
   @Patch('admin/:id/status')

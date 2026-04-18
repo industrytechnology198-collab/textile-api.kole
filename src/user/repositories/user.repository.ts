@@ -24,16 +24,26 @@ export class UserRepository {
     return this.prisma.user.create({ data });
   }
 
-  async findAll(page: number, limit: number) {
+  async findAll(page: number, limit: number, search?: string) {
     const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { firstName: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { lastName: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
         take: limit,
+        where,
         select: USER_PUBLIC_SELECT,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.user.count(),
+      this.prisma.user.count({ where }),
     ]);
     return { users, total, page, limit };
   }

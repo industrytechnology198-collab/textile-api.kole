@@ -9,6 +9,6 @@ export class GetUsersHandler {
   async execute(query: GetUsersQueryDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
-    return this.userRepository.findAll(page, limit);
+    return this.userRepository.findAll(page, limit, query.search);
   }
 }

@@ -23,6 +23,18 @@ export function ApiAdminGetAllQuotes() {
   );
 }
 
+export function ApiAdminGetQuoteById() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: '[Admin] Get a single quote by ID',
+      description: '🔒🛡️ **Admin only.** Returns full quote detail including user, address, and items.',
+    }),
+    ApiOkResponse({ description: 'Quote request detail.' }),
+    ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' }),
+  );
+}
+
 export function ApiAdminUpdateQuoteStatus() {
   return applyDecorators(
     ApiBearerAuth(),
