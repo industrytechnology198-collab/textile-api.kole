@@ -18,10 +18,10 @@ export class GetSyncLogsQueryDto {
   @Max(100)
   limit: number = 20;
 
-  @ApiPropertyOptional({ enum: ['upsert', 'deleted'] })
+  @ApiPropertyOptional({ enum: ['upsert', 'deleted', 'hard-upsert'] })
   @IsOptional()
   @IsString()
-  @IsIn(['upsert', 'deleted'])
+  @IsIn(['upsert', 'deleted', 'hard-upsert'])
   type?: string;
 
   @ApiPropertyOptional({ enum: ['running', 'success', 'failed'] })
