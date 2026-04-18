@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ToptexApiService } from '../services/toptex-api.service';
 import { ToptexRepository } from '../repositories/toptex.repository';
+import { IncrementalSyncRepository } from '../repositories/incremental-sync.repository';
 
 const PAGE_SIZE = 50;
 const LANGS = 'fr,en,de,nl';
@@ -56,11 +57,38 @@ export class ToptexHardUpsertHandler {
   constructor(
     private readonly toptexApi: ToptexApiService,
     private readonly toptexRepo: ToptexRepository,
+    private readonly syncRepo: IncrementalSyncRepository,
   ) {}
 
   async execute(
     startPage: number = 1,
-  ): Promise<{ message: string; stats: HardUpsertStats }> {
+  ): Promise<{ message: string; syncLogId: string }> {
+    const syncLog = await this.syncRepo.createSyncLog({
+      type: 'hard-upsert',
+      status: 'running',
+    });
+
+    // Run in background — caller gets the syncLogId immediately to track progress
+    this.runBackground(syncLog.id, startPage).catch(() => {
+      // errors are handled inside runBackground
+    });
+
+    return {
+      message: 'Hard upsert started in background. Use the syncLogId to track progress.',
+      syncLogId: syncLog.id,
+    };
+  }
+
+  // Used by the nightly scheduler — creates log and awaits full completion
+  async executeSync(startPage: number = 1): Promise<void> {
+    const syncLog = await this.syncRepo.createSyncLog({
+      type: 'hard-upsert',
+      status: 'running',
+    });
+    await this.runBackground(syncLog.id, startPage);
+  }
+
+  async runBackground(syncLogId: string, startPage: number = 1): Promise<void> {
     this.logger.log('=== Starting Hard Upsert Toptex Sync (NO DATA DELETION) ===');
     this.logger.log(
       'This operation will UPDATE all existing products and their images/colors/skus without deleting any data.',
@@ -175,6 +203,13 @@ export class ToptexHardUpsertHandler {
       new Date().toISOString(),
     );
 
+    await this.syncRepo.updateSyncLog(syncLogId, {
+      status: this.stats.errorCount > 0 && this.stats.productsProcessed === 0 ? 'failed' : 'success',
+      finishedAt: this.stats.endTime!,
+      processedItems: this.stats.productsProcessed,
+      failedItems: this.stats.errorCount,
+    });
+
     this.logger.log('=== Hard Upsert Complete ===');
     this.logger.log(`Duration: ${duration}s`);
     this.logger.log(`Products Processed: ${this.stats.productsProcessed}`);
@@ -185,11 +220,6 @@ export class ToptexHardUpsertHandler {
     this.logger.log(`SKUs: ${this.stats.skusProcessed}`);
     this.logger.log(`Packshots: ${this.stats.packshots}`);
     this.logger.log(`Errors: ${this.stats.errorCount}`);
-
-    return {
-      message: `Hard upsert complete. All products refreshed with latest data (including image tokens).`,
-      stats: this.stats,
-    };
   }
 
   private async fetchPage(

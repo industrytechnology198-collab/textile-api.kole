@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SyncLog } from '@prisma/client';
 import { ToptexStatusHandler } from './handlers/toptex-status.handler';
 import { ToptexSyncHandler } from './handlers/toptex-sync.handler';
-import { ToptexHardUpsertHandler, type HardUpsertStats } from './handlers/toptex-hard-upsert.handler';
+import { ToptexHardUpsertHandler } from './handlers/toptex-hard-upsert.handler';
 import {
   SyncLogsHandler,
   SyncStatusResponse,
@@ -32,7 +32,7 @@ export class ToptexService {
 
   async runHardUpsert(
     startPage: number = 1,
-  ): Promise<{ message: string; stats: HardUpsertStats }> {
+  ): Promise<{ message: string; syncLogId: string }> {
     return this.hardUpsertHandler.execute(startPage);
   }
 

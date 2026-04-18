@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { IncrementalSyncService } from './incremental-sync.service';
+import { ToptexHardUpsertHandler } from '../handlers/toptex-hard-upsert.handler';
 
 @Injectable()
 export class NightlySchedulerService {
@@ -8,22 +9,24 @@ export class NightlySchedulerService {
 
   constructor(
     private readonly incrementalSyncService: IncrementalSyncService,
+    private readonly hardUpsertHandler: ToptexHardUpsertHandler,
   ) {}
 
   @Cron('0 2 * * *')
-  async runNightlySync(): Promise<void> {
-    this.logger.log('Nightly sync started');
+  async runNightlyHardUpsertWithDelete(): Promise<void> {
+    this.logger.log('Nightly hard upsert + delete sync started');
 
+    // Step 1: Run full hard upsert (creates/updates all products)
     try {
-      await this.incrementalSyncService.runUpsertSync();
-      this.logger.log('Nightly upsert sync triggered');
+      await this.hardUpsertHandler.executeSync(1);
+      this.logger.log('Nightly hard upsert completed');
     } catch (err) {
       this.logger.error(
-        `Nightly upsert sync failed to start: ${err instanceof Error ? err.message : String(err)}`,
+        `Nightly hard upsert failed: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
 
-    // Always run deleted sync regardless of upsert result
+    // Step 2: Always run deleted sync after hard upsert
     try {
       await this.incrementalSyncService.runDeletedSync();
       this.logger.log('Nightly deleted sync triggered');

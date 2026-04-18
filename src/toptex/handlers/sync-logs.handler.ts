@@ -17,8 +17,10 @@ export interface SyncStatusEntry {
 export interface SyncStatusResponse {
   upsert: SyncStatusEntry;
   deleted: SyncStatusEntry;
+  hardUpsert: SyncStatusEntry;
   lastUpsertSyncDate: string | null;
   lastDeletedSyncDate: string | null;
+  lastHardUpsertDate: string | null;
 }
 
 function toStatusEntry(log: SyncLog | null): SyncStatusEntry {
@@ -51,19 +53,23 @@ export class SyncLogsHandler {
   }
 
   async getSyncStatus(): Promise<SyncStatusResponse> {
-    const [upsertLog, deletedLog, lastUpsertDate, lastDeletedDate] =
+    const [upsertLog, deletedLog, hardUpsertLog, lastUpsertDate, lastDeletedDate, lastHardUpsertDate] =
       await Promise.all([
         this.syncRepo.findLastSyncLogByType('upsert'),
         this.syncRepo.findLastSyncLogByType('deleted'),
+        this.syncRepo.findLastSyncLogByType('hard-upsert'),
         this.syncRepo.getSetting('last_upsert_sync'),
         this.syncRepo.getSetting('last_deleted_sync'),
+        this.syncRepo.getSetting('toptex_last_hard_upsert'),
       ]);
 
     return {
       upsert: toStatusEntry(upsertLog),
       deleted: toStatusEntry(deletedLog),
+      hardUpsert: toStatusEntry(hardUpsertLog),
       lastUpsertSyncDate: lastUpsertDate,
       lastDeletedSyncDate: lastDeletedDate,
+      lastHardUpsertDate: lastHardUpsertDate,
     };
   }
 }
