@@ -11,9 +11,9 @@ import {
 import { Type, Transform } from 'class-transformer';
 
 export class GetFiltersDto {
-  @ApiProperty({ description: 'Language ("en" | "fr" | "de")' })
+  @ApiProperty({ description: 'Language ("en" | "fr" | "de" | "nl")' })
   @IsString()
-  @IsIn(['en', 'fr', 'de'])
+  @IsIn(['en', 'fr', 'de', 'nl'])
   lang!: string;
 
   @ApiPropertyOptional({
