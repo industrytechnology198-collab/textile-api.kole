@@ -1,0 +1,165 @@
+================================================================================
+AUTH — LOGIN & REGISTER — FRONTEND TASKS
+================================================================================
+
+IMPORTANT NOTE FOR FRONTEND
+----------------------------
+Every API error returns a JSON body like this:
+
+  {
+    "statusCode": 401,
+    "message":    "Invalid credentials",
+    "error":      "Unauthorized"
+  }
+
+You MUST read response.data.message (or err.response.data.message in axios)
+and show THAT text to the user.
+Do NOT show a generic "Please refresh" message. The API already tells you
+exactly what went wrong — just display it.
+
+
+================================================================================
+1. LOGIN
+================================================================================
+
+  POST /auth/login
+
+REQUEST BODY (application/json):
+  {
+    "email":    "john.doe@example.com",   // required, must be a valid email
+    "password": "password123"             // required, min 8 characters
+  }
+
+SUCCESS RESPONSE — HTTP 201:
+  {
+    "accessToken": "eyJhbGci...",
+    "user": {
+      "id":              "uuid",
+      "email":           "john.doe@example.com",
+      "firstName":       "John",
+      "lastName":        "Doe",
+      "role":            "CUSTOMER",        // or "ADMIN"
+      "isEmailVerified": true
+    }
+  }
+
+  → Store accessToken in memory / localStorage.
+  → The refresh token is set automatically as an httpOnly cookie by the server.
+    You do NOT need to handle it manually.
+  → Redirect to dashboard based on role:
+      role = "ADMIN"    → /admin/dashboard
+      role = "CUSTOMER" → /dashboard
+
+ERROR RESPONSES — what to show the user:
+
+  HTTP 400  "Please login with Google"
+  → This email was registered via Google.
+    Show: "This account uses Google login. Please sign in with Google."
+
+  HTTP 401  "Invalid credentials"
+  → Email does not exist OR password is wrong.
+    Show: "Email or password is incorrect."
+    (Do NOT say which one specifically — this is intentional for security.)
+
+  HTTP 422 / 400  (validation error, missing or bad field)
+  → The request body is malformed.
+    Show: "Please enter a valid email and password."
+
+HOW TO READ THE ERROR (axios example):
+  catch (err) {
+    const message = err?.response?.data?.message;
+    // use 'message' to decide what to show
+  }
+
+
+================================================================================
+2. REGISTER
+================================================================================
+
+  POST /auth/register
+
+REQUEST BODY (application/json):
+  {
+    "firstName":   "John",                // required
+    "lastName":    "Doe",                 // required
+    "email":       "john.doe@example.com",// required, must be a valid email
+    "password":    "password123",         // required, min 8 characters
+    "phoneNumber": "+3212345678"          // OPTIONAL — can be omitted entirely
+  }
+
+SUCCESS RESPONSE — HTTP 201:
+  {
+    "message": "Verification email sent"
+  }
+
+  → Do NOT log the user in yet.
+  → Show a message:
+      "Registration successful! Please check your email to verify your account."
+  → Redirect to the verify-email page (or show an inline verification code input).
+
+ERROR RESPONSES — what to show the user:
+
+  HTTP 409  "Email already in use"
+  → An account already exists with this email.
+    Show: "An account with this email already exists. Please log in."
+
+  HTTP 400  (validation error — bad field format)
+  → The body failed validation.
+    Show the specific field error if available, otherwise:
+    "Please check all fields and try again."
+    Common causes:
+      - email is not a valid email address
+      - password is shorter than 8 characters
+      - firstName or lastName is missing
+
+HOW TO READ THE ERROR (axios example):
+  catch (err) {
+    const message = err?.response?.data?.message;
+    // 'message' can be a string or an array of strings for validation errors
+    const text = Array.isArray(message) ? message[0] : message;
+    // show 'text' to the user
+  }
+
+
+================================================================================
+3. AFTER LOGIN — KEEPING THE SESSION ALIVE
+================================================================================
+
+The accessToken expires after a short time (e.g. 15 minutes).
+To get a new one WITHOUT asking the user to log in again:
+
+  POST /auth/refresh
+  (no body needed — the refresh_token cookie is sent automatically by the browser)
+
+SUCCESS RESPONSE — HTTP 201:
+  {
+    "accessToken": "eyJhbGci..."  // new token
+  }
+
+  → Replace the stored accessToken with this new one.
+
+ERROR — HTTP 401:
+  → Refresh token is expired or invalid.
+  → Clear the stored accessToken and redirect to /login.
+
+RECOMMENDED FLOW:
+  - On every API call, if you get 401 → try POST /auth/refresh once.
+  - If refresh also returns 401 → redirect to login.
+  - This is called a "silent refresh" / "token retry interceptor".
+
+
+================================================================================
+SUMMARY TABLE
+================================================================================
+
+  Endpoint         Method  Auth needed  Success  Key errors
+  ───────────────────────────────────────────────────────────────────────────
+  /auth/register   POST    No           201      409 email in use, 400 validation
+  /auth/login      POST    No           201      401 wrong creds, 400 google account
+  /auth/refresh    POST    No (cookie)  201      401 session expired → redirect login
+  /auth/logout     POST    Bearer JWT   201      —
+
+
+================================================================================
+END OF TASKS
+================================================================================

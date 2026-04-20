@@ -9,6 +9,8 @@ import { AdminGetAllQuotesHandler } from './handlers/admin-get-all-quotes.handle
 import { AdminGetQuoteByIdHandler } from './handlers/admin-get-quote-by-id.handler';
 import { AdminUpdateQuoteStatusHandler } from './handlers/admin-update-quote-status.handler';
 import { AdminUpdateQuoteNoteHandler } from './handlers/admin-update-quote-note.handler';
+import { AdminMarkQuotePaidHandler } from './handlers/admin-mark-quote-paid.handler';
+import { GetMyStatsHandler } from './handlers/get-my-stats.handler';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { AuthModule } from 'src/auth/auth.module';
 // EmailService is exported from AuthModule
@@ -26,6 +28,8 @@ import { AuthModule } from 'src/auth/auth.module';
     AdminGetQuoteByIdHandler,
     AdminUpdateQuoteStatusHandler,
     AdminUpdateQuoteNoteHandler,
+    AdminMarkQuotePaidHandler,
+    GetMyStatsHandler,
   ],
 })
 export class QuoteModule {}

@@ -10,6 +10,8 @@ import { AdminGetAllQuotesHandler } from './handlers/admin-get-all-quotes.handle
 import { AdminGetQuoteByIdHandler } from './handlers/admin-get-quote-by-id.handler';
 import { AdminUpdateQuoteStatusHandler } from './handlers/admin-update-quote-status.handler';
 import { AdminUpdateQuoteNoteHandler } from './handlers/admin-update-quote-note.handler';
+import { AdminMarkQuotePaidHandler } from './handlers/admin-mark-quote-paid.handler';
+import { GetMyStatsHandler } from './handlers/get-my-stats.handler';
 
 @Injectable()
 export class QuoteService {
@@ -21,6 +23,8 @@ export class QuoteService {
     private readonly adminGetQuoteByIdHandler: AdminGetQuoteByIdHandler,
     private readonly adminUpdateQuoteStatusHandler: AdminUpdateQuoteStatusHandler,
     private readonly adminUpdateQuoteNoteHandler: AdminUpdateQuoteNoteHandler,
+    private readonly adminMarkQuotePaidHandler: AdminMarkQuotePaidHandler,
+    private readonly getMyStatsHandler: GetMyStatsHandler,
   ) {}
 
   createQuote(userId: string, userEmail: string, dto: CreateQuoteDto) {
@@ -49,5 +53,13 @@ export class QuoteService {
 
   adminUpdateQuoteNote(id: string, dto: AdminUpdateQuoteNoteDto) {
     return this.adminUpdateQuoteNoteHandler.execute(id, dto.adminNote);
+  }
+
+  adminMarkQuoteAsPaid(id: string) {
+    return this.adminMarkQuotePaidHandler.execute(id);
+  }
+
+  getMyStats(userId: string) {
+    return this.getMyStatsHandler.execute(userId);
   }
 }

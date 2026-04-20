@@ -20,12 +20,13 @@ import { CreateQuoteDto } from './dto/create-quote.dto';
 import { GetMyQuotesQueryDto, AdminGetQuotesQueryDto } from './dto/get-quotes-query.dto';
 import { AdminUpdateQuoteStatusDto, AdminUpdateQuoteNoteDto } from './dto/admin-update-quote.dto';
 import { ApiCreateQuote } from './decorators/create-quote.decorator';
-import { ApiGetMyQuotes, ApiGetMyQuoteById } from './decorators/get-my-quotes.decorator';
+import { ApiGetMyQuotes, ApiGetMyQuoteById, ApiGetMyStats } from './decorators/get-my-quotes.decorator';
 import {
   ApiAdminGetAllQuotes,
   ApiAdminGetQuoteById,
   ApiAdminUpdateQuoteStatus,
   ApiAdminUpdateQuoteNote,
+  ApiAdminMarkQuotePaid,
 } from './decorators/admin-quote.decorator';
 
 @ApiTags('Quote Requests')
@@ -52,6 +53,12 @@ export class QuoteController {
     @Query() query: GetMyQuotesQueryDto,
   ) {
     return this.quoteService.getMyQuotes(user.userId, query);
+  }
+
+  @Get('my/stats')
+  @ApiGetMyStats()
+  getMyStats(@CurrentUser() user: JwtPayload) {
+    return this.quoteService.getMyStats(user.userId);
   }
 
   @Get('my/:id')
@@ -97,5 +104,12 @@ export class QuoteController {
     @Body() dto: AdminUpdateQuoteNoteDto,
   ) {
     return this.quoteService.adminUpdateQuoteNote(id, dto);
+  }
+
+  @Patch('admin/:id/mark-paid')
+  @Roles(Role.ADMIN)
+  @ApiAdminMarkQuotePaid()
+  adminMarkAsPaid(@Param('id') id: string) {
+    return this.quoteService.adminMarkQuoteAsPaid(id);
   }
 }

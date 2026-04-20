@@ -30,3 +30,26 @@ export function ApiGetMyQuoteById() {
     ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' }),
   );
 }
+
+export function ApiGetMyStats() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: 'Get my quote statistics',
+      description: '🔒 Returns totals for the authenticated user: total quotes, pending, delivered, and total spent.',
+    }),
+    ApiOkResponse({
+      description: 'User quote statistics.',
+      schema: {
+        type: 'object',
+        properties: {
+          totalQuotes:    { type: 'number', example: 8 },
+          pendingCount:   { type: 'number', example: 2 },
+          deliveredCount: { type: 'number', example: 3 },
+          totalSpent:     { type: 'number', example: 1284.50 },
+        },
+      },
+    }),
+    ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' }),
+  );
+}

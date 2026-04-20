@@ -424,6 +424,8 @@ model QuoteRequest {
   note         String?                          // user comment at submission
   adminNote    String?                          // internal admin note
   confirmedAt  DateTime?                        // when admin acknowledges
+  isPaid       Boolean     @default(false)      // admin manually marks as paid
+  paidAt       DateTime?                        // when admin marked as paid
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 

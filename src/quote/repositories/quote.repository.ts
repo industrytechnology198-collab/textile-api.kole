@@ -160,4 +160,39 @@ export class QuoteRepository {
       include: adminQuoteInclude,
     });
   }
+
+  async getMyStats(userId: string) {
+    const [grouped, paidAggregate] = await Promise.all([
+      this.prisma.quoteRequest.groupBy({
+        by: ['status'],
+        where: { userId },
+        _count: { status: true },
+      }),
+      this.prisma.quoteRequest.aggregate({
+        where: { userId, isPaid: true },
+        _sum: { totalPrice: true },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const countMap: Record<string, number> = {};
+    for (const row of grouped) {
+      countMap[row.status] = row._count.status;
+    }
+
+    const totalQuotes = Object.values(countMap).reduce((a, b) => a + b, 0);
+    const pendingCount = (countMap['PENDING'] ?? 0) + (countMap['CONFIRMED'] ?? 0);
+    const deliveredCount = countMap['DELIVERED'] ?? 0;
+    const totalSpent = Math.round(Number(paidAggregate._sum?.totalPrice ?? 0) * 100) / 100;
+
+    return { totalQuotes, pendingCount, deliveredCount, totalSpent };
+  }
+
+  markAsPaid(id: string) {
+    return this.prisma.quoteRequest.update({
+      where: { id },
+      data: { isPaid: true, paidAt: new Date() },
+      include: adminQuoteInclude,
+    });
+  }
 }

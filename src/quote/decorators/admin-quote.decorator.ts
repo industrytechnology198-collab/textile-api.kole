@@ -69,3 +69,15 @@ export function ApiAdminUpdateQuoteNote() {
     ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' }),
   );
 }
+
+export function ApiAdminMarkQuotePaid() {
+  return applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: '[Admin] Mark a quote as paid',
+      description: '🔒🛡️ **Admin only.** Sets isPaid = true and records paidAt timestamp.',
+    }),
+    ApiOkResponse({ description: 'Quote marked as paid.' }),
+    ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' }),
+  );
+}
