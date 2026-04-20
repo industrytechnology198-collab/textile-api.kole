@@ -123,7 +123,7 @@ export class ProductRepository {
           ? Prisma.sql`AND EXISTS (
               SELECT 1 FROM "ProductColor" _c2
               WHERE _c2."productId" = p."id" AND _c2."saleState" = 'active'
-              AND _c2."hexColor" IN (${Prisma.join(filters.colors)})
+              AND _c2."colorCode" IN (${Prisma.join(filters.colors)})
             )`
           : Prisma.empty;
 
@@ -222,18 +222,12 @@ export class ProductRepository {
       base = { ...filters, searchIds };
     }
 
-    const [colorsBaseIds, sizesBaseIds, brandsBaseIds, priceBaseIds] =
-      await Promise.all([
-        this.getProductIds({ ...base, colors: undefined }),
-        this.getProductIds({ ...base, sizes: undefined }),
-        this.getProductIds({ ...base, brands: undefined }),
-        this.getProductIds(base),
-      ]);
+    const priceBaseIds = await this.getProductIds(base);
 
     const [colors, sizes, brands, priceRange] = await Promise.all([
-      this.getColorCounts(colorsBaseIds, lang),
-      this.getSizeCounts(sizesBaseIds),
-      this.getBrandCounts(brandsBaseIds),
+      this.getColorCounts(priceBaseIds, lang, base.colors),
+      this.getSizeCounts(priceBaseIds, base.sizes),
+      this.getBrandCounts(priceBaseIds),
       this.computePriceRange(priceBaseIds),
     ]);
 
@@ -297,19 +291,27 @@ export class ProductRepository {
   private async getColorCounts(
     productIds: string[],
     lang: string,
-  ): Promise<{ hex: string; name: string; count: number }[]> {
+    colorCodes?: string[],
+  ): Promise<{ hex: string; name: string; count: number; code: string }[]> {
     if (productIds.length === 0) return [];
 
+    const colorFilter =
+      colorCodes && colorCodes.length > 0
+        ? Prisma.sql`AND pc."colorCode" IN (${Prisma.join(colorCodes)})`
+        : Prisma.empty;
+
     const rows = await this.prisma.$queryRaw<
-      { hexColor: string; count: bigint; colorId: string }[]
+      { hexColor: string; count: bigint; colorId: string; colorCode: string }[]
     >`
       SELECT pc."hexColor",
              COUNT(DISTINCT pc."productId") AS "count",
-             MIN(pc."id"::text)::uuid AS "colorId"
+             MIN(pc."id"::text)::uuid AS "colorId",
+             MIN(pc."colorCode") AS "colorCode"
       FROM "ProductColor" pc
       WHERE pc."productId" IN (${Prisma.join(productIds)})
         AND pc."saleState" = 'active'
         AND pc."hexColor" IS NOT NULL
+        ${colorFilter}
       GROUP BY pc."hexColor"
       ORDER BY "count" DESC
     `;
@@ -334,14 +336,20 @@ export class ProductRepository {
         (t) => t.entityId === row.colorId && t.langCode === 'en',
       );
       const name = (nameInLang ?? nameInEn)?.value ?? '';
-      return { hex: row.hexColor, name, count: Number(row.count) };
+      return { hex: row.hexColor, name, count: Number(row.count), code: row.colorCode };
     });
   }
 
   async getSizeCounts(
     productIds: string[],
+    sizeLabels?: string[],
   ): Promise<{ label: string; count: number }[]> {
     if (productIds.length === 0) return [];
+
+    const sizeFilter =
+      sizeLabels && sizeLabels.length > 0
+        ? Prisma.sql`AND s."sizeLabel" IN (${Prisma.join(sizeLabels)})`
+        : Prisma.empty;
 
     const rows = await this.prisma.$queryRaw<
       { sizeLabel: string; count: bigint }[]
@@ -354,6 +362,7 @@ export class ProductRepository {
         AND s."saleState" = 'active'
         AND s."isDiscontinued" = false
         AND s."sizeLabel" IS NOT NULL
+        ${sizeFilter}
       GROUP BY s."sizeLabel"
     `;
 
@@ -589,7 +598,7 @@ export class ProductRepository {
         colors: {
           some: {
             saleState: 'active',
-            hexColor: { in: filters.colors },
+            colorCode: { in: filters.colors },
           },
         },
       });

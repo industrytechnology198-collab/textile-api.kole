@@ -60,18 +60,21 @@ export class GetFiltersDto {
 
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsString({ each: true })
   colors?: string[];
 
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsString({ each: true })
   sizes?: string[];
 
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsString({ each: true })
   brands?: string[];

@@ -81,6 +81,7 @@ export class GetProductsDto {
     description: 'Filter by hex color codes e.g. ["#000000","#ffffff"]',
   })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsString({ each: true })
   colors?: string[];
@@ -90,6 +91,7 @@ export class GetProductsDto {
     description: 'Filter by size labels e.g. ["S","M","L"]',
   })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsString({ each: true })
   sizes?: string[];
@@ -99,6 +101,7 @@ export class GetProductsDto {
     description: 'Filter by brand names e.g. ["Beechfield®","Kariban"]',
   })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsString({ each: true })
   brands?: string[];
