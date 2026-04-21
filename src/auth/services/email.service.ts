@@ -22,6 +22,7 @@ import {
   buildQuoteStatusUpdateHtml,
   getQuoteStatusUpdateSubject,
 } from '../templates/quote-status-update.template';
+import { buildContactAdminHtml } from '../templates/contact-admin.template';
 
 @Injectable()
 export class EmailService {
@@ -142,5 +143,32 @@ export class EmailService {
     if (error) {
       this.logger.error(`Resend error (quote notification admin): ${JSON.stringify(error)}`);
     }
+  }
+
+  async sendContactMessageToAdmin(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<void> {
+    const adminEmail = this.configService.get<string>('ADMIN_EMAIL', this.from);
+
+    this.logger.log(
+      `[Contact] Sending message from "${data.name}" <${data.email}> to admin: ${adminEmail}`,
+    );
+
+    const { data: sent, error } = await this.resend.emails.send({
+      from: this.from,
+      to: adminEmail,
+      subject: `📩 Contact: ${data.subject}`,
+      html: buildContactAdminHtml(data),
+    });
+
+    if (error) {
+      this.logger.error(`Resend error (contact admin): ${JSON.stringify(error)}`);
+      throw new InternalServerErrorException('Failed to send contact message');
+    }
+
+    this.logger.log(`[Contact] Email sent successfully. Resend id: ${sent?.id}`);
   }
 }

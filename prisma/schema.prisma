@@ -349,6 +349,7 @@ model Review {
   productId String   @db.Uuid
   rating    Int
   comment   String?
+  isVisible Boolean  @default(false)  // admin must approve before it shows publicly
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -448,4 +449,18 @@ model QuoteRequestItem {
   sku          ProductSku   @relation(fields: [skuId], references: [id])
 
   @@index([quoteRequestId])
+}
+
+// ─────────────────────────────────────────────
+// NEWSLETTER SUBSCRIBERS
+// ─────────────────────────────────────────────
+
+model Subscriber {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
 }

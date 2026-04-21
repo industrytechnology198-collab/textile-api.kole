@@ -15,7 +15,7 @@ async function bootstrap() {
       'http://localhost:3001',
       'https://textile.kole.be',
       'https://textile.kole-frontend.vercel.app',
-      'kole-tex.vercel.app',
+      'https://kole-tex.vercel.app',
     ],
     credentials: true,
   });
@@ -35,7 +35,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
-    jsonDocumentUrl: 'api-json', // 👈 THIS is what you need
+    jsonDocumentUrl: 'api-json', 
   });
 
   const port = process.env.PORT || 4873;

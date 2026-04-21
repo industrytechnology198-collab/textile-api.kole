@@ -15,6 +15,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { QuoteModule } from './quote/quote.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { ContactModule } from './contact/contact.module';
+import { SubscriberModule } from './subscriber/subscriber.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -35,6 +37,8 @@ import { RolesGuard } from './auth/guards/roles.guard';
     WishlistModule,
     QuoteModule,
     AnalyticsModule,
+    ContactModule,
+    SubscriberModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

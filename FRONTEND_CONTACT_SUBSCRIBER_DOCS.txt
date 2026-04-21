@@ -1,0 +1,169 @@
+====================================================================
+  FRONTEND INTEGRATION DOCS — Contact & Subscriber Endpoints
+====================================================================
+
+
+--------------------------------------------------------------------
+1. CONTACT FORM  —  POST /contact
+--------------------------------------------------------------------
+
+Purpose : User fills a contact form → message is sent by email to the admin.
+
+Method  : POST
+URL     : /contact
+Auth    : ❌ Not required (public)
+
+Request Body (JSON):
+{
+  "name":    "John Doe",           // required | string | max 100 chars
+  "email":   "john@example.com",   // required | valid email
+  "subject": "Question about ...", // required | string | max 150 chars
+  "message": "Hello, I would ..."  // required | string | max 2000 chars
+}
+
+Success Response — 201 Created:
+{
+  "message": "Your message has been sent successfully."
+}
+
+Error Responses:
+  400 Bad Request   → missing / invalid fields
+  500 Internal      → email delivery failed (Resend issue)
+
+Example fetch (JavaScript):
+──────────────────────────
+  const res = await fetch(`${BASE_URL}/contact`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'John Doe',
+      email: 'john@example.com',
+      subject: 'Question about an order',
+      message: 'Hello, I would like to know more about...',
+    }),
+  });
+
+  const data = await res.json();
+  // data.message → "Your message has been sent successfully."
+
+
+--------------------------------------------------------------------
+2. NEWSLETTER SUBSCRIBE  —  POST /subscribers
+--------------------------------------------------------------------
+
+Purpose : User enters their email in the newsletter input → saved to DB.
+
+Method  : POST
+URL     : /subscribers
+Auth    : ❌ Not required (public)
+
+Request Body (JSON):
+{
+  "email": "user@example.com"   // required | valid email
+}
+
+Success Response — 201 Created:
+{
+  "id":        "uuid",
+  "email":     "user@example.com",
+  "isActive":  true,
+  "createdAt": "2026-04-21T...",
+  "updatedAt": "2026-04-21T..."
+}
+
+Error Responses:
+  400 Bad Request  → invalid email format
+  409 Conflict     → email already subscribed
+
+Example fetch (JavaScript):
+──────────────────────────
+  const res = await fetch(`${BASE_URL}/subscribers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'user@example.com' }),
+  });
+
+  if (res.status === 409) {
+    // Already subscribed — handle gracefully (e.g. "You are already subscribed")
+  }
+
+  const data = await res.json();
+
+
+--------------------------------------------------------------------
+3. ADMIN — Manage Subscribers  (all require Admin JWT)
+--------------------------------------------------------------------
+
+All admin endpoints require:
+  Header: Authorization: Bearer <admin_jwt_token>
+
+──────────────────────────────────────────
+GET /subscribers
+──────────────────────────────────────────
+Purpose : List all subscribers.
+Auth    : ✅ Admin only
+
+Success Response — 200 OK:
+[
+  {
+    "id":        "uuid",
+    "email":     "user@example.com",
+    "isActive":  true,
+    "createdAt": "2026-04-21T...",
+    "updatedAt": "2026-04-21T..."
+  },
+  ...
+]
+
+──────────────────────────────────────────
+PATCH /subscribers/:id
+──────────────────────────────────────────
+Purpose : Update a subscriber's email or active status.
+Auth    : ✅ Admin only
+
+URL Param : id  (subscriber UUID)
+
+Request Body (JSON) — all fields optional:
+{
+  "email":    "newemail@example.com",
+  "isActive": false
+}
+
+Success Response — 200 OK:
+{ updated subscriber object }
+
+Error Responses:
+  404 Not Found  → subscriber not found
+  409 Conflict   → new email already in use
+
+──────────────────────────────────────────
+DELETE /subscribers/:id
+──────────────────────────────────────────
+Purpose : Permanently delete a subscriber.
+Auth    : ✅ Admin only
+
+URL Param : id  (subscriber UUID)
+
+Success Response — 200 OK:
+{
+  "message": "Subscriber removed successfully."
+}
+
+Error Responses:
+  404 Not Found  → subscriber not found
+
+
+====================================================================
+  NOTES
+====================================================================
+
+- The contact form does NOT save to the database.
+  The message is delivered directly to the admin email inbox.
+
+- The subscriber table is standalone — not linked to any user account.
+  A visitor can subscribe with any email without registering.
+
+- isActive flag can be used on the frontend to show/hide subscribers
+  in admin dashboards (e.g. filter active vs unsubscribed).
+
+====================================================================

@@ -7,6 +7,7 @@ import { FindAllByProductHandler } from './handlers/find-all-by-product.handler'
 import { FindAllReviewsHandler } from './handlers/find-all-reviews.handler';
 import { UpdateReviewHandler } from './handlers/update-review.handler';
 import { RemoveReviewHandler } from './handlers/remove-review.handler';
+import { SetReviewVisibilityHandler } from './handlers/set-review-visibility.handler';
 import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     FindAllReviewsHandler,
     UpdateReviewHandler,
     RemoveReviewHandler,
+    SetReviewVisibilityHandler,
   ],
 })
 export class ReviewsModule {}

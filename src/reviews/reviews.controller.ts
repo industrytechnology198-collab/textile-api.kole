@@ -18,11 +18,13 @@ import type { JwtPayload } from 'src/auth/strategies/jwt.strategy';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { SetReviewVisibilityDto } from './dto/set-review-visibility.dto';
 import { ApiCreateReview } from './decorators/create-review.decorator';
 import { ApiFindAllByProduct } from './decorators/find-all-by-product.decorator';
 import { ApiFindAllReviews } from './decorators/find-all-reviews.decorator';
 import { ApiUpdateReview } from './decorators/update-review.decorator';
 import { ApiRemoveReview } from './decorators/remove-review.decorator';
+import { ApiSetReviewVisibility } from './decorators/set-review-visibility.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Reviews')
@@ -67,5 +69,16 @@ export class ReviewsController {
   @ApiRemoveReview()
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.reviewsService.remove(id, user.userId, user.role);
+  }
+
+  @Patch(':id/visibility')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiSetReviewVisibility()
+  setVisibility(
+    @Param('id') id: string,
+    @Body() dto: SetReviewVisibilityDto,
+  ) {
+    return this.reviewsService.setVisibility(id, dto);
   }
 }

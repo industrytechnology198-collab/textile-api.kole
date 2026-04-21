@@ -42,7 +42,7 @@ export class ReviewRepository {
 
   findAllByProduct(productId: string) {
     return this.prisma.review.findMany({
-      where: { productId },
+      where: { productId, isVisible: true },
       orderBy: { createdAt: 'desc' },
       include: reviewInclude,
     });
@@ -80,6 +80,14 @@ export class ReviewRepository {
 
   delete(id: string): Promise<void> {
     return this.prisma.review.delete({ where: { id } }).then(() => undefined);
+  }
+
+  setVisibility(id: string, isVisible: boolean) {
+    return this.prisma.review.update({
+      where: { id },
+      data: { isVisible },
+      include: reviewInclude,
+    });
   }
 
   productExists(productId: string): Promise<boolean> {
