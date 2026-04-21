@@ -52,7 +52,7 @@ export class CreateQuoteHandler {
         throw new BadRequestException(`SKU ${item.skuId} is not available`);
       }
 
-      const unitPrice = Number(sku.price) * 2; // ×2 pricing rule
+      const unitPrice = Number(sku.publicPrice ?? sku.price);
       resolvedItems.push({ skuId: item.skuId, quantity: item.quantity, unitPrice });
     }
 

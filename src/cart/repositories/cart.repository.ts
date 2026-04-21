@@ -144,6 +144,7 @@ export class CartRepository {
               sku: {
                 select: {
                   price: true,
+                  publicPrice: true,
                 },
               },
             },

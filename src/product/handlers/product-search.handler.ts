@@ -31,7 +31,7 @@ export class ProductSearchHandler {
       for (const color of p.colors) {
         if (color.skus.length > 0) {
           activeColorsCount++;
-          const validPrices = color.skus.map((s) => Number(s.price));
+          const validPrices = color.skus.map((s) => Number(s.publicPrice));
           const colorMin = Math.min(...validPrices);
           if (minPrice === null || colorMin < minPrice) {
             minPrice = colorMin;

@@ -69,7 +69,8 @@ export class GetCartHandler {
     }));
 
     const total = items.reduce(
-      (sum, item) => sum + item.sku.price * item.quantity,
+      (sum, item) =>
+        sum + (item.sku.publicPrice ?? item.sku.price) * item.quantity,
       0,
     );
 

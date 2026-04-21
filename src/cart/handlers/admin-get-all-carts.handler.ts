@@ -15,7 +15,7 @@ export class AdminGetAllCartsHandler {
     const data = carts.map((cart) => {
       const itemCount = cart.cartItems.length;
       const totalValue = cart.cartItems.reduce(
-        (sum, item) => sum + Number(item.sku.price) * item.quantity,
+        (sum, item) => sum + Number(item.sku.publicPrice ?? item.sku.price) * item.quantity,
         0,
       );
 

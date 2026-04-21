@@ -50,7 +50,7 @@ export class QuoteRepository {
   findSkuById(skuId: string) {
     return this.prisma.productSku.findUnique({
       where: { id: skuId },
-      select: { id: true, price: true, saleState: true, isDiscontinued: true },
+      select: { id: true, price: true, publicPrice: true, saleState: true, isDiscontinued: true },
     });
   }
 

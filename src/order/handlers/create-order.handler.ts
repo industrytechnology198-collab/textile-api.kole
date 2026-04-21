@@ -59,7 +59,8 @@ export class CreateOrderHandler {
     }
 
     const totalPrice = cart.cartItems.reduce(
-      (acc, item) => acc + Number(item.sku.price) * item.quantity,
+      (acc, item) =>
+        acc + Number(item.sku.publicPrice ?? item.sku.price) * item.quantity,
       0,
     );
 
@@ -73,7 +74,7 @@ export class CreateOrderHandler {
       items: cart.cartItems.map((item) => ({
         skuId: item.skuId,
         quantity: item.quantity,
-        price: Number(item.sku.price),
+        price: Number(item.sku.publicPrice ?? item.sku.price),
       })),
     });
 
