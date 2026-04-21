@@ -9,7 +9,7 @@ export class ProductListHandler {
   constructor(private readonly productRepo: ProductRepository) {}
 
   async execute(dto: GetProductsDto) {
-    let targetCategoryId: string | null = null;
+    let targetCategoryIds: string[] = [];
 
     if (dto.categorySlug) {
       const parentCat = await this.productRepo.findCategoryBySlug(
@@ -18,7 +18,6 @@ export class ProductListHandler {
       if (!parentCat) {
         throw new BadRequestException('Category slug not found');
       }
-      targetCategoryId = parentCat.id;
 
       if (dto.subCategorySlug) {
         const subCat = await this.productRepo.findCategoryBySlug(
@@ -32,12 +31,15 @@ export class ProductListHandler {
             'Subcategory does not belong to this category',
           );
         }
-        targetCategoryId = subCat.id;
+        targetCategoryIds = [subCat.id];
+      } else {
+        const childIds = await this.productRepo.findChildCategoryIds(parentCat.id);
+        targetCategoryIds = [parentCat.id, ...childIds];
       }
     }
 
     const filters = {
-      categoryId: targetCategoryId,
+      categoryIds: targetCategoryIds,
       minPrice: dto.minPrice,
       maxPrice: dto.maxPrice,
       organic: dto.organic,

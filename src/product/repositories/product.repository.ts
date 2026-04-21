@@ -5,7 +5,7 @@ import { CategoryBase } from 'src/category/types/category-detail-raw.interface';
 import { ProductListRaw } from '../types/product-detail-raw.interface';
 
 export interface ProductFilters {
-  categoryId: string | null;
+  categoryIds: string[];
   minPrice?: number;
   maxPrice?: number;
   organic?: boolean;
@@ -71,6 +71,14 @@ export class ProductRepository {
     return category;
   }
 
+  async findChildCategoryIds(parentId: string): Promise<string[]> {
+    const children = await this.prisma.category.findMany({
+      where: { parentId },
+      select: { id: true },
+    });
+    return children.map((c) => c.id);
+  }
+
   async getFilteredProductsPaginated(
     filters: ProductFilters,
     sortBy: string,
@@ -114,9 +122,10 @@ export class ProductRepository {
         (acc, p) => Prisma.sql`${acc} AND ${p}`,
       );
 
-      const catJoin = filters.categoryId
-        ? Prisma.sql`INNER JOIN "ProductCategory" _cat ON _cat."productId" = p."id" AND _cat."categoryId" = ${filters.categoryId}`
-        : Prisma.empty;
+      const catJoin =
+        filters.categoryIds && filters.categoryIds.length > 0
+          ? Prisma.sql`INNER JOIN "ProductCategory" _cat ON _cat."productId" = p."id" AND _cat."categoryId" IN (${Prisma.join(filters.categoryIds)})`
+          : Prisma.empty;
 
       const colorsExists =
         filters.colors && filters.colors.length > 0
@@ -626,8 +635,8 @@ export class ProductRepository {
       AND: andConditions,
     };
 
-    if (filters.categoryId) {
-      where.categories = { some: { categoryId: filters.categoryId } };
+    if (filters.categoryIds && filters.categoryIds.length > 0) {
+      where.categories = { some: { categoryId: { in: filters.categoryIds } } };
     }
     if (filters.organic !== undefined) {
       where.organic = filters.organic;
