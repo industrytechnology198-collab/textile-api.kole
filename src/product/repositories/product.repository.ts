@@ -107,9 +107,9 @@ export class ProductRepository {
         Prisma.sql`s."isDiscontinued" = false`,
       ];
       if (filters.minPrice !== undefined)
-        skuParts.push(Prisma.sql`s."price" >= ${filters.minPrice}`);
+        skuParts.push(Prisma.sql`s."publicPrice" >= ${filters.minPrice}`);
       if (filters.maxPrice !== undefined)
-        skuParts.push(Prisma.sql`s."price" <= ${filters.maxPrice}`);
+        skuParts.push(Prisma.sql`s."publicPrice" <= ${filters.maxPrice}`);
       const skuFilter = skuParts.reduce(
         (acc, p) => Prisma.sql`${acc} AND ${p}`,
       );
@@ -141,7 +141,7 @@ export class ProductRepository {
           : Prisma.empty;
 
       const sortRows = await this.prisma.$queryRaw<RawSortResult[]>`
-        SELECT p."id", MIN(s."price") as "minSortPrice"
+        SELECT p."id", MIN(s."publicPrice") as "minSortPrice"
         FROM "Product" p
         INNER JOIN "ProductColor" c ON c."productId" = p."id" AND c."saleState" = 'active'
         INNER JOIN "ProductSku" s ON s."colorId" = c."id" AND ${skuFilter}
@@ -398,7 +398,7 @@ export class ProductRepository {
       SELECT MIN(sub."minPrice")::float AS "min",
              MAX(sub."minPrice")::float AS "max"
       FROM (
-        SELECT pc."productId", MIN(s."price") AS "minPrice"
+        SELECT pc."productId", MIN(s."publicPrice") AS "minPrice"
         FROM "ProductSku" s
         INNER JOIN "ProductColor" pc
           ON pc."id" = s."colorId" AND pc."saleState" = 'active'
@@ -581,7 +581,7 @@ export class ProductRepository {
               some: {
                 saleState: 'active',
                 isDiscontinued: false,
-                ...(priceFilter && { price: priceFilter }),
+                ...(priceFilter && { publicPrice: priceFilter }),
               },
             },
           },
