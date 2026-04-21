@@ -9,6 +9,7 @@ import {
   IsString,
   Max,
   Min,
+  MinLength,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
@@ -17,6 +18,14 @@ export class GetProductsDto {
   @IsString()
   @IsIn(['en', 'fr', 'de', 'nl'])
   lang!: string;
+
+  @ApiPropertyOptional({
+    description: 'Search term (min 2 chars) — scopes results to matching products while keeping all active filters',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  q?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

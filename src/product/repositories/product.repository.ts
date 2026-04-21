@@ -149,6 +149,11 @@ export class ProductRepository {
             )`
           : Prisma.empty;
 
+      const searchIdsFilter =
+        filters.searchIds && filters.searchIds.length > 0
+          ? Prisma.sql`AND p."id" IN (${Prisma.join(filters.searchIds)})`
+          : Prisma.empty;
+
       const sortRows = await this.prisma.$queryRaw<RawSortResult[]>`
         SELECT p."id", MIN(s."publicPrice") as "minSortPrice"
         FROM "Product" p
@@ -158,6 +163,7 @@ export class ProductRepository {
         WHERE ${wherePart}
         ${colorsExists}
         ${sizesExists}
+        ${searchIdsFilter}
         GROUP BY p."id"
         ORDER BY "minSortPrice" ${sortDir}
         OFFSET ${offset}
@@ -175,6 +181,7 @@ export class ProductRepository {
         WHERE ${wherePart}
         ${colorsExists}
         ${sizesExists}
+        ${searchIdsFilter}
       `;
 
       total = Number(countRows[0].count);
@@ -243,7 +250,7 @@ export class ProductRepository {
     return { colors, sizes, brands, priceRange };
   }
 
-  private async getProductIdsMatchingSearch(
+  async getProductIdsMatchingSearch(
     q: string,
     lang: string,
   ): Promise<string[]> {

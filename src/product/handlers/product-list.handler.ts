@@ -49,6 +49,15 @@ export class ProductListHandler {
       brands: dto.brands,
     };
 
+    if (dto.q) {
+      const searchIds = await this.productRepo.getProductIdsMatchingSearch(dto.q, dto.lang);
+      if (searchIds.length === 0) {
+        const totalPages = Math.ceil(0 / dto.limit);
+        return { data: [], total: 0, page: dto.page, limit: dto.limit, totalPages };
+      }
+      (filters as any).searchIds = searchIds;
+    }
+
     const { products, total } =
       await this.productRepo.getFilteredProductsPaginated(
         filters,
